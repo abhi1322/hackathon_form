@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminCookieName, verifyAdminToken } from "@/lib/auth";
+import { getAdminCookieName, verifyAdminToken } from "./lib/auth-edge";
 
 const PUBLIC_ADMIN_PATHS = ["/admin/login", "/api/admin/login"];
 

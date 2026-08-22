@@ -1,7 +1,9 @@
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT } from "jose";
+import { getAdminCookieName, verifyAdminToken } from "./auth-edge";
 
-const COOKIE_NAME = "admin_token";
 const TOKEN_TTL = "7d";
+
+export { getAdminCookieName, verifyAdminToken };
 
 function getSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET;
@@ -11,21 +13,12 @@ function getSecret(): Uint8Array {
   return new TextEncoder().encode(secret);
 }
 
-export function getAdminCookieName(): string {
-  return COOKIE_NAME;
-}
-
 export async function signAdminToken(email: string): Promise<string> {
   return new SignJWT({ role: "admin", email })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(TOKEN_TTL)
     .sign(getSecret());
-}
-
-export async function verifyAdminToken(token: string) {
-  const { payload } = await jwtVerify(token, getSecret());
-  return payload;
 }
 
 export function validateAdminCredentials(
