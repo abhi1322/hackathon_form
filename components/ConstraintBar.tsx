@@ -9,6 +9,7 @@ interface ConstraintBarProps {
   maxTeamSize: number;
   femaleCount: number;
   minFemaleMembers: number;
+  problemSelected: boolean;
   isFormValid: boolean;
 }
 
@@ -37,6 +38,7 @@ export function ConstraintBar({
   maxTeamSize,
   femaleCount,
   minFemaleMembers,
+  problemSelected,
   isFormValid,
 }: ConstraintBarProps) {
   const memberCountOk =
@@ -54,8 +56,9 @@ export function ConstraintBar({
           ok={femaleCountOk}
           label={`Female ${femaleCount}/${minFemaleMembers} min`}
         />
+        <StatusItem ok={problemSelected} label="Problem selected" />
         <StatusItem
-          ok={isFormValid && memberCountOk && femaleCountOk}
+          ok={isFormValid && memberCountOk && femaleCountOk && problemSelected}
           label="Ready to submit"
         />
       </ul>

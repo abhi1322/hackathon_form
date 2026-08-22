@@ -8,7 +8,7 @@ import {
 } from "@/lib/models/Config";
 import {
   mergeProblemStatements,
-  parseBulkProblemStatements,
+  normalizeProblemStatements,
 } from "@/lib/problem-statements";
 import {
   adminConfigUpdateSchema,
@@ -89,16 +89,10 @@ function applyConfigUpdates(
     }
   }
 
-  const hasProblemStatementUpdate =
-    "problemStatements" in rawBody || "bulkProblemStatements" in rawBody;
-
-  if (hasProblemStatementUpdate) {
-    const base = updates.problemStatements ?? config.problemStatements ?? [];
-    const bulkStatements = updates.bulkProblemStatements
-      ? parseBulkProblemStatements(updates.bulkProblemStatements)
-      : [];
-    const merged = mergeProblemStatements(base, bulkStatements);
-
+  if ("problemStatements" in rawBody) {
+    const incoming = normalizeProblemStatements(updates.problemStatements ?? []);
+    // Client sends the full desired list (already merged + deduped).
+    const merged = mergeProblemStatements([], incoming);
     config.set("problemStatements", merged);
     config.markModified("problemStatements");
   }

@@ -4,9 +4,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence } from "framer-motion";
 import { Loader2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import {
+  Controller,
+  useFieldArray,
+  useForm,
+  useWatch,
+} from "react-hook-form";
 import { MemberRow } from "@/components/MemberRow";
-import { Button, FieldError, Input, Label, Select } from "@/components/ui/form";
+import { ProblemStatementSelect } from "@/components/ProblemStatementSelect";
+import { Button, FieldError, Input, Label } from "@/components/ui/form";
+import {
+  findProblemStatement,
+  getProblemStatementId,
+  normalizeProblemStatement,
+  type ProblemStatement,
+} from "@/lib/problem-statements";
 import type { PublicConfig } from "@/lib/public-config";
 import {
   createRegistrationSchema,
@@ -55,12 +67,25 @@ export function EditTeamModal({
   );
 
   const problemStatementOptions = useMemo(() => {
-    const options = [...config.problemStatements];
+    const options: ProblemStatement[] = [...config.problemStatements];
     const legacy = team.problemStatement.trim();
-    if (legacy && !options.includes(legacy)) {
-      options.unshift(legacy);
-    }
+    if (!legacy) return options;
+
+    const existing = findProblemStatement(options, legacy);
+    if (existing) return options;
+
+    const normalized = normalizeProblemStatement(legacy);
+    if (normalized) options.unshift(normalized);
     return options;
+  }, [config.problemStatements, team.problemStatement]);
+
+  const defaultProblemValue = useMemo(() => {
+    const match = findProblemStatement(
+      config.problemStatements,
+      team.problemStatement,
+    );
+    if (match) return getProblemStatementId(match);
+    return team.problemStatement;
   }, [config.problemStatements, team.problemStatement]);
 
   const {
@@ -75,7 +100,7 @@ export function EditTeamModal({
     mode: "onChange",
     defaultValues: {
       teamName: team.name,
-      problemStatement: team.problemStatement,
+      problemStatement: defaultProblemValue,
       members: team.members.map((member) => ({
         name: member.name,
         email: member.email,
@@ -137,9 +162,7 @@ export function EditTeamModal({
       <div className="w-full max-w-3xl rounded-[var(--radius-lg)] border border-border bg-surface">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
-            <h2 className="text-xl font-semibold text-text">
-              Edit Team
-            </h2>
+            <h2 className="text-xl font-semibold text-text">Edit Team</h2>
             <p className="text-sm text-text-muted">{team.name}</p>
           </div>
           <Button type="button" variant="ghost" onClick={onClose}>
@@ -158,19 +181,19 @@ export function EditTeamModal({
             <Label htmlFor="edit-problemStatement">Problem Statement</Label>
             {problemStatementOptions.length > 0 ? (
               <>
-                <Select
-                  id="edit-problemStatement"
-                  {...register("problemStatement")}
-                >
-                  <option value="" disabled>
-                    Select a problem statement
-                  </option>
-                  {problemStatementOptions.map((statement) => (
-                    <option key={statement} value={statement}>
-                      {statement}
-                    </option>
-                  ))}
-                </Select>
+                <Controller
+                  name="problemStatement"
+                  control={control}
+                  render={({ field }) => (
+                    <ProblemStatementSelect
+                      id="edit-problemStatement"
+                      statements={problemStatementOptions}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
+                  )}
+                />
                 <FieldError message={errors.problemStatement?.message} />
               </>
             ) : (

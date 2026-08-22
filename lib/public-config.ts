@@ -1,3 +1,5 @@
+import type { ProblemStatement } from "@/lib/problem-statements";
+
 export const DEFAULT_FORM_COPY = {
   formEyebrow: "Hackathon 2026",
   formTitle: "Team Registration",
@@ -25,7 +27,7 @@ export type PublicConfig = {
   successTitle: string;
   successMessage: string;
   submitButtonText: string;
-  problemStatements: string[];
+  problemStatements: ProblemStatement[];
 };
 
 export function interpolateSuccessMessage(

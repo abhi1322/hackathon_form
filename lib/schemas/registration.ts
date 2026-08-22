@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { buildEmailDomainRegex } from "@/lib/normalize";
-import { isValidProblemStatement } from "@/lib/problem-statements";
+import {
+  isValidProblemStatement,
+  normalizeProblemStatements,
+  type ProblemStatement,
+} from "@/lib/problem-statements";
 
 export const genderEnum = z.enum(["Male", "Female", "Other"]);
 
@@ -9,12 +13,32 @@ export type RegistrationConfig = {
   maxTeamSize: number;
   minFemaleMembers: number;
   allowedEmailDomain: string;
-  problemStatements: string[];
+  problemStatements: ProblemStatement[];
 };
 
 type RegistrationSchemaOptions = {
   legacyProblemStatement?: string;
 };
+
+export const problemStatementSchema = z
+  .object({
+    serialNo: z.string().trim().max(40).optional().default(""),
+    organization: z.string().trim().max(300).default(""),
+    title: z.string().trim().min(1, "Title is required").max(500),
+    category: z.string().trim().max(80).default(""),
+    psNumber: z.string().trim().max(80).default(""),
+    theme: z.string().trim().max(120).default(""),
+    deadline: z.string().trim().max(80).default(""),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.title.trim() && !data.psNumber.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Title or PS Number is required",
+        path: ["title"],
+      });
+    }
+  });
 
 export function createMemberSchema(allowedEmailDomain: string) {
   const domainRegex = buildEmailDomainRegex(allowedEmailDomain);
@@ -34,10 +58,14 @@ export function createMemberSchema(allowedEmailDomain: string) {
       .trim()
       .min(1, "Registration ID is required")
       .transform((val) => val.replace(/\s+/g, "").toUpperCase())
-      .refine((val) => /^([A-Z]{2}[0-9]{9}|[A-Z]{3}[0-9]{8})$/.test(val), {
-        message:
-          "Use format GF202346252 or PGD12345678 (2–3 letters + digits, 11 characters)",
-      }),
+      .refine(
+        (val) =>
+          /^[A-Z]{2}[0-9]{9}$/.test(val) || /^PGD[0-9]{8}$/.test(val),
+        {
+          message:
+            "Use GF202346252 (2 letters + 9 digits) or PGD12345678 (PGD + 8 digits)",
+        },
+      ),
     phone: z
       .string()
       .trim()
@@ -52,6 +80,7 @@ export function createRegistrationSchema(
   options: RegistrationSchemaOptions = {},
 ) {
   const memberSchema = createMemberSchema(config.allowedEmailDomain);
+  const problemStatements = normalizeProblemStatements(config.problemStatements);
 
   return z
     .object({
@@ -64,7 +93,7 @@ export function createRegistrationSchema(
       members: z.array(memberSchema),
     })
     .superRefine((data, ctx) => {
-      if (config.problemStatements.length === 0) {
+      if (problemStatements.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Problem statements are not configured yet",
@@ -76,7 +105,7 @@ export function createRegistrationSchema(
       if (
         !isValidProblemStatement(
           data.problemStatement,
-          config.problemStatements,
+          problemStatements,
           options.legacyProblemStatement,
         )
       ) {
@@ -182,11 +211,7 @@ export const adminConfigUpdateSchema = z
     successTitle: z.string().trim().min(1).max(120).optional(),
     successMessage: z.string().trim().min(1).max(500).optional(),
     submitButtonText: z.string().trim().min(1).max(80).optional(),
-    problemStatements: z
-      .array(z.string().trim().min(1).max(200))
-      .max(100)
-      .optional(),
-    bulkProblemStatements: z.string().max(5000).optional(),
+    problemStatements: z.array(problemStatementSchema).max(500).optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -207,5 +232,8 @@ export type AdminConfigUpdate = z.infer<typeof adminConfigUpdateSchema>;
 export function toRegistrationConfig(
   config: RegistrationConfig,
 ): RegistrationConfig {
-  return config;
+  return {
+    ...config,
+    problemStatements: normalizeProblemStatements(config.problemStatements),
+  };
 }

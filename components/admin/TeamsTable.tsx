@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Fragment, useState } from "react";
 import { Button, Input } from "@/components/ui/form";
 import { cn } from "@/lib/cn";
+import { resolveProblemStatementDisplay } from "@/lib/problem-statements";
 import type { PublicConfig } from "@/lib/public-config";
 import { EditTeamModal, type TeamRecord } from "@/components/admin/EditTeamModal";
 
@@ -106,8 +107,13 @@ export function TeamsTable({
                             {team.name}
                           </button>
                         </td>
-                        <td className="px-4 py-3 text-text-muted max-w-[14rem] truncate">
-                          {team.problemStatement || "—"}
+                        <td className="px-4 py-3 text-text-muted max-w-[18rem]">
+                          <span className="line-clamp-2">
+                            {resolveProblemStatementDisplay(
+                              team.problemStatement,
+                              config?.problemStatements ?? [],
+                            )}
+                          </span>
                         </td>
                         <td className="px-4 py-3">{team.memberCount}</td>
                         <td className="px-4 py-3">
@@ -155,7 +161,10 @@ export function TeamsTable({
                                 <span className="font-medium text-text">
                                   Problem Statement:
                                 </span>{" "}
-                                {team.problemStatement}
+                                {resolveProblemStatementDisplay(
+                                  team.problemStatement,
+                                  config?.problemStatements ?? [],
+                                )}
                               </p>
                             )}
                             <div className="grid gap-3">

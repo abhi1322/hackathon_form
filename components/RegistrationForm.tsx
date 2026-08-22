@@ -4,16 +4,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence } from "framer-motion";
 import { Loader2, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import {
+  Controller,
+  useFieldArray,
+  useForm,
+  useWatch,
+} from "react-hook-form";
 import { ConstraintBar } from "@/components/ConstraintBar";
 import { MemberRow } from "@/components/MemberRow";
+import { ProblemStatementSelect } from "@/components/ProblemStatementSelect";
 import {
   Button,
   Card,
   FieldError,
   Input,
   Label,
-  Select,
 } from "@/components/ui/form";
 import {
   interpolateSuccessMessage,
@@ -144,6 +149,8 @@ export function RegistrationForm() {
   }, [config, reset]);
 
   const watchedMembers = useWatch({ control, name: "members" }) ?? [];
+  const watchedProblemStatement =
+    useWatch({ control, name: "problemStatement" }) ?? "";
   const memberCount = watchedMembers.length;
   const femaleCount = watchedMembers.filter(
     (member) => member?.gender === "Female",
@@ -154,10 +161,12 @@ export function RegistrationForm() {
 
   const problemStatementsConfigured =
     (config?.problemStatements?.length ?? 0) > 0;
+  const problemSelected = watchedProblemStatement.trim().length > 0;
 
   const constraintsMet =
     !!config &&
     problemStatementsConfigured &&
+    problemSelected &&
     memberCount >= config.minTeamSize &&
     memberCount <= config.maxTeamSize &&
     femaleCount >= config.minFemaleMembers;
@@ -260,20 +269,19 @@ export function RegistrationForm() {
           <Label htmlFor="problemStatement">Problem Statement</Label>
           {problemStatementsConfigured ? (
             <>
-              <Select
-                id="problemStatement"
-                defaultValue=""
-                {...register("problemStatement")}
-              >
-                <option value="" disabled>
-                  Select a problem statement
-                </option>
-                {config.problemStatements.map((statement) => (
-                  <option key={statement} value={statement}>
-                    {statement}
-                  </option>
-                ))}
-              </Select>
+              <Controller
+                name="problemStatement"
+                control={control}
+                render={({ field }) => (
+                  <ProblemStatementSelect
+                    id="problemStatement"
+                    statements={config.problemStatements}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                )}
+              />
               <FieldError message={errors.problemStatement?.message} />
             </>
           ) : (
@@ -326,6 +334,7 @@ export function RegistrationForm() {
           maxTeamSize={config.maxTeamSize}
           femaleCount={femaleCount}
           minFemaleMembers={config.minFemaleMembers}
+          problemSelected={problemSelected}
           isFormValid={isValid}
         />
 

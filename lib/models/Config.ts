@@ -1,10 +1,15 @@
 import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
 import {
+  normalizeProblemStatements,
+  type ProblemStatement,
+} from "@/lib/problem-statements";
+import {
   DEFAULT_FORM_COPY,
   type PublicConfig,
 } from "@/lib/public-config";
 
 export { DEFAULT_FORM_COPY, type PublicConfig };
+export type { ProblemStatement };
 
 const configSchema = new Schema(
   {
@@ -67,7 +72,7 @@ const configSchema = new Schema(
       trim: true,
     },
     problemStatements: {
-      type: [String],
+      type: [Schema.Types.Mixed],
       required: true,
       default: [],
     },
@@ -101,7 +106,7 @@ export function toPublicConfig(config: IConfig): PublicConfig {
     successMessage: config.successMessage ?? DEFAULT_FORM_COPY.successMessage,
     submitButtonText:
       config.submitButtonText ?? DEFAULT_FORM_COPY.submitButtonText,
-    problemStatements: config.problemStatements ?? [],
+    problemStatements: normalizeProblemStatements(config.problemStatements),
   };
 }
 
@@ -125,6 +130,16 @@ export async function getOrCreateConfig(): Promise<ConfigDocument> {
     config.set("problemStatements", []);
     config.markModified("problemStatements");
     changed = true;
+  } else {
+    const normalized = normalizeProblemStatements(problemStatements);
+    const needsNormalize =
+      normalized.length !== problemStatements.length ||
+      problemStatements.some((item) => typeof item === "string");
+    if (needsNormalize) {
+      config.set("problemStatements", normalized);
+      config.markModified("problemStatements");
+      changed = true;
+    }
   }
 
   if (changed) {
