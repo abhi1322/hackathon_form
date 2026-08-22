@@ -25,7 +25,22 @@ export function Input({
   return (
     <input
       className={cn(
-        "w-full min-h-11 rounded-[var(--radius-md)] border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-[border-color,box-shadow] duration-[var(--duration-fast)]",
+        "w-full min-h-11 rounded-[var(--radius-md)] border border-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text-muted focus:outline-none focus:border-primary/40 transition-[border-color] duration-[var(--duration-fast)]",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export function Textarea({
+  className,
+  ...props
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      className={cn(
+        "w-full min-h-24 rounded-[var(--radius-md)] border border-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text-muted focus:outline-none focus:border-primary/40 transition-[border-color] duration-[var(--duration-fast)] resize-y",
         className,
       )}
       {...props}
@@ -41,7 +56,7 @@ export function Select({
   return (
     <select
       className={cn(
-        "w-full min-h-11 rounded-[var(--radius-md)] border border-border bg-surface px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-[border-color,box-shadow] duration-[var(--duration-fast)]",
+        "w-full min-h-11 rounded-[var(--radius-md)] border border-border bg-surface px-3 py-2.5 text-sm text-text focus:outline-none focus:border-primary/40 transition-[border-color] duration-[var(--duration-fast)]",
         className,
       )}
       {...props}
@@ -71,7 +86,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 min-h-11 px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium transition-colors duration-[var(--duration-fast)] focus:outline-none focus:ring-2 focus:ring-primary/30",
+        "inline-flex items-center justify-center gap-2 min-h-11 px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium transition-colors duration-[var(--duration-fast)] focus:outline-none focus:ring-2 focus:ring-primary/20",
         variants[variant],
         className,
       )}
@@ -90,7 +105,7 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-[var(--radius-lg)] border border-border bg-surface p-5 shadow-[var(--shadow-1)]",
+        "rounded-[var(--radius-lg)] border border-border bg-surface p-6",
         className,
       )}
     >
@@ -99,7 +114,11 @@ export function Card({
   );
 }
 
+export function SectionDivider({ className }: { className?: string }) {
+  return <div className={cn("border-t border-border", className)} />;
+}
+
 export function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="mt-1 text-xs text-error">{message}</p>;
+  return <p className="mt-1.5 text-xs text-error">{message}</p>;
 }

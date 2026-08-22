@@ -42,10 +42,10 @@ export function StatsCards({ stats }: { stats: StatsData | null }) {
       {cards.map((card) => (
         <div
           key={card.label}
-          className="rounded-[var(--radius-lg)] border border-border bg-surface p-5 shadow-[var(--shadow-1)]"
+          className="rounded-[var(--radius-lg)] border border-border bg-surface px-5 py-4"
         >
           <p className="text-sm text-text-muted">{card.label}</p>
-          <p className="mt-1 font-display text-2xl font-medium text-text">
+          <p className="mt-1 text-2xl font-semibold tracking-tight text-text">
             {card.value}
           </p>
         </div>

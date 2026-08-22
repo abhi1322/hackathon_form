@@ -44,7 +44,8 @@ function AdminLoginForm() {
 
   return (
     <Card className="w-full max-w-md">
-      <h1 className="font-display text-2xl font-medium text-text mb-2">
+      <div className="accent-bar mb-5" />
+      <h1 className="text-2xl font-semibold tracking-tight text-text mb-2">
         Admin Login
       </h1>
       <p className="text-sm text-text-muted mb-6">
@@ -93,7 +94,7 @@ function AdminLoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <main className="min-h-screen bg-bg flex items-center justify-center px-4">
+    <main className="page-shell min-h-screen flex items-center justify-center px-4">
       <Suspense
         fallback={
           <Card className="w-full max-w-md flex items-center justify-center py-10">

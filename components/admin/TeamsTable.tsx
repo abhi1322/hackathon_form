@@ -54,7 +54,7 @@ export function TeamsTable({
 
   return (
     <>
-      <div className="rounded-[var(--radius-lg)] border border-border bg-surface shadow-[var(--shadow-1)] overflow-hidden">
+      <div className="rounded-[var(--radius-lg)] border border-border bg-surface overflow-hidden">
         <div className="border-b border-border p-4">
           <Input
             placeholder="Search by team name, member name, email, or registration ID"

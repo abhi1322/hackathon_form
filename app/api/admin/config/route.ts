@@ -6,7 +6,10 @@ import {
   toPublicConfig,
   type ConfigDocument,
 } from "@/lib/models/Config";
-import { adminConfigUpdateSchema } from "@/lib/schemas/registration";
+import {
+  adminConfigUpdateSchema,
+  type AdminConfigUpdate,
+} from "@/lib/schemas/registration";
 
 export async function GET() {
   const unauthorized = await requireAdminApiAuth();
@@ -55,30 +58,27 @@ export async function PATCH(request: Request) {
   }
 }
 
-function applyConfigUpdates(
-  config: ConfigDocument,
-  updates: {
-    minTeamSize?: number;
-    maxTeamSize?: number;
-    minFemaleMembers?: number;
-    allowedEmailDomain?: string;
-    registrationOpen?: boolean;
-  },
-) {
-  if (updates.minTeamSize !== undefined) {
-    config.minTeamSize = updates.minTeamSize;
-  }
-  if (updates.maxTeamSize !== undefined) {
-    config.maxTeamSize = updates.maxTeamSize;
-  }
-  if (updates.minFemaleMembers !== undefined) {
-    config.minFemaleMembers = updates.minFemaleMembers;
-  }
-  if (updates.allowedEmailDomain !== undefined) {
-    config.allowedEmailDomain = updates.allowedEmailDomain;
-  }
-  if (updates.registrationOpen !== undefined) {
-    config.registrationOpen = updates.registrationOpen;
+function applyConfigUpdates(config: ConfigDocument, updates: AdminConfigUpdate) {
+  const fields: Array<keyof AdminConfigUpdate> = [
+    "minTeamSize",
+    "maxTeamSize",
+    "minFemaleMembers",
+    "allowedEmailDomain",
+    "registrationOpen",
+    "formEyebrow",
+    "formTitle",
+    "formDescription",
+    "closedTitle",
+    "closedMessage",
+    "successTitle",
+    "successMessage",
+    "submitButtonText",
+  ];
+
+  for (const field of fields) {
+    if (updates[field] !== undefined) {
+      config.set(field, updates[field]);
+    }
   }
 
   if (config.minTeamSize > config.maxTeamSize) {

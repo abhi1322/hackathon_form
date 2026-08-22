@@ -13,8 +13,12 @@ import {
   FieldError,
   Input,
   Label,
+  Textarea,
 } from "@/components/ui/form";
-import type { PublicConfig } from "@/lib/models/Config";
+import {
+  interpolateSuccessMessage,
+  type PublicConfig,
+} from "@/lib/models/Config";
 import {
   createRegistrationSchema,
   type MemberInput,
@@ -28,6 +32,23 @@ const emptyMember = (): MemberInput => ({
   phone: "",
   gender: "Male",
 });
+
+function RegistrationHero({ config }: { config: PublicConfig }) {
+  return (
+    <header className="mb-10 text-center">
+      <div className="accent-bar mx-auto mb-5" />
+      <p className="text-xs font-medium uppercase tracking-[0.14em] text-primary mb-3">
+        {config.formEyebrow}
+      </p>
+      <h1 className="text-3xl sm:text-[2rem] font-semibold tracking-tight text-text mb-3">
+        {config.formTitle}
+      </h1>
+      <p className="text-text-muted text-base leading-relaxed max-w-[34rem] mx-auto">
+        {config.formDescription}
+      </p>
+    </header>
+  );
+}
 
 export function RegistrationForm() {
   const [config, setConfig] = useState<PublicConfig | null>(null);
@@ -153,7 +174,7 @@ export function RegistrationForm() {
   if (!config) {
     return (
       <Card className="text-center">
-        <h2 className="font-display text-xl font-medium text-text mb-2">
+        <h2 className="text-xl font-semibold text-text mb-2">
           Unable to Load Registration
         </h2>
         <p className="text-text-muted">
@@ -166,103 +187,110 @@ export function RegistrationForm() {
 
   if (!config.registrationOpen) {
     return (
-      <Card className="text-center py-10">
-        <h2 className="font-display text-2xl font-medium text-text mb-2">
-          Registration Closed
-        </h2>
-        <p className="text-text-muted">
-          Team registration is not open at this time. Please check back later.
-        </p>
-      </Card>
+      <>
+        <RegistrationHero config={config} />
+        <Card className="text-center py-12">
+          <h2 className="text-2xl font-semibold text-text mb-3">
+            {config.closedTitle}
+          </h2>
+          <p className="text-text-muted leading-relaxed">{config.closedMessage}</p>
+        </Card>
+      </>
     );
   }
 
   if (successTeamName) {
     return (
-      <Card className="text-center py-10">
-        <h2 className="font-display text-2xl font-medium text-text mb-2">
-          Registration Successful
-        </h2>
-        <p className="text-text-muted">
-          Team <strong className="text-text">{successTeamName}</strong> has been
-          registered successfully.
-        </p>
-      </Card>
+      <>
+        <RegistrationHero config={config} />
+        <Card className="text-center py-12">
+          <h2 className="text-2xl font-semibold text-text mb-3">
+            {config.successTitle}
+          </h2>
+          <p className="text-text-muted leading-relaxed">
+            {interpolateSuccessMessage(config.successMessage, successTeamName)}
+          </p>
+        </Card>
+      </>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6 pb-28">
-      <Card>
-        <Label htmlFor="teamName">Team Name</Label>
-        <Input
-          id="teamName"
-          placeholder="Enter a unique team name"
-          {...register("teamName")}
-        />
-        <FieldError message={errors.teamName?.message} />
-      </Card>
+    <>
+      <RegistrationHero config={config} />
 
-      <div className="space-y-4">
-        <AnimatePresence initial={false}>
-          {fields.map((field, index) => (
-            <MemberRow
-              key={field.id}
-              index={index}
-              isLeader={index === 0}
-              canRemove={canRemoveMember}
-              config={config}
-              register={register}
-              errors={errors}
-              onRemove={() => remove(index)}
-              setError={setError}
-              clearErrors={clearErrors}
-            />
-          ))}
-        </AnimatePresence>
-      </div>
+      <form onSubmit={onSubmit} className="space-y-8 pb-28">
+        <Card>
+          <Label htmlFor="teamName">Team Name</Label>
+          <Input
+            id="teamName"
+            placeholder="Enter a unique team name"
+            {...register("teamName")}
+          />
+          <FieldError message={errors.teamName?.message} />
+        </Card>
 
-      {canAddMember && (
-        <Button
-          type="button"
-          variant="secondary"
-          className="w-full"
-          onClick={() => append(emptyMember())}
-        >
-          <Plus className="h-4 w-4" />
-          Add Member
-        </Button>
-      )}
-
-      {submitError && (
-        <div className="rounded-[var(--radius-md)] border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
-          {submitError}
+        <div className="space-y-4">
+          <AnimatePresence initial={false}>
+            {fields.map((field, index) => (
+              <MemberRow
+                key={field.id}
+                index={index}
+                isLeader={index === 0}
+                canRemove={canRemoveMember}
+                config={config}
+                register={register}
+                errors={errors}
+                onRemove={() => remove(index)}
+                setError={setError}
+                clearErrors={clearErrors}
+              />
+            ))}
+          </AnimatePresence>
         </div>
-      )}
 
-      <ConstraintBar
-        memberCount={memberCount}
-        minTeamSize={config.minTeamSize}
-        maxTeamSize={config.maxTeamSize}
-        femaleCount={femaleCount}
-        minFemaleMembers={config.minFemaleMembers}
-        isFormValid={isValid}
-      />
-
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={!isValid || !constraintsMet || submitting}
-      >
-        {submitting ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Submitting...
-          </>
-        ) : (
-          "Submit Registration"
+        {canAddMember && (
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full"
+            onClick={() => append(emptyMember())}
+          >
+            <Plus className="h-4 w-4" />
+            Add Member
+          </Button>
         )}
-      </Button>
-    </form>
+
+        {submitError && (
+          <div className="rounded-[var(--radius-md)] border border-error/25 bg-error/5 px-4 py-3 text-sm text-error">
+            {submitError}
+          </div>
+        )}
+
+        <ConstraintBar
+          memberCount={memberCount}
+          minTeamSize={config.minTeamSize}
+          maxTeamSize={config.maxTeamSize}
+          femaleCount={femaleCount}
+          minFemaleMembers={config.minFemaleMembers}
+          isFormValid={isValid}
+        />
+
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={!isValid || !constraintsMet || submitting}
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            config.submitButtonText
+          )}
+        </Button>
+      </form>
+    </>
   );
 }

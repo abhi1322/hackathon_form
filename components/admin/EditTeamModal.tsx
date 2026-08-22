@@ -120,10 +120,10 @@ export function EditTeamModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:p-8">
-      <div className="w-full max-w-3xl rounded-[var(--radius-lg)] border border-border bg-surface shadow-[var(--shadow-2)]">
+      <div className="w-full max-w-3xl rounded-[var(--radius-lg)] border border-border bg-surface">
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div>
-            <h2 className="font-display text-xl font-medium text-text">
+            <h2 className="text-xl font-semibold text-text">
               Edit Team
             </h2>
             <p className="text-sm text-text-muted">{team.name}</p>

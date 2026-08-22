@@ -136,6 +136,14 @@ export const adminConfigUpdateSchema = z
     minFemaleMembers: z.number().int().min(0).optional(),
     allowedEmailDomain: z.string().trim().min(3).optional(),
     registrationOpen: z.boolean().optional(),
+    formEyebrow: z.string().trim().min(1).max(120).optional(),
+    formTitle: z.string().trim().min(1).max(120).optional(),
+    formDescription: z.string().trim().min(1).max(500).optional(),
+    closedTitle: z.string().trim().min(1).max(120).optional(),
+    closedMessage: z.string().trim().min(1).max(500).optional(),
+    successTitle: z.string().trim().min(1).max(120).optional(),
+    successMessage: z.string().trim().min(1).max(500).optional(),
+    submitButtonText: z.string().trim().min(1).max(80).optional(),
   })
   .superRefine((data, ctx) => {
     if (

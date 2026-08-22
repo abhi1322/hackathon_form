@@ -73,13 +73,14 @@ export function AdminDashboard() {
   }
 
   return (
-    <div className="mx-auto max-w-[1200px] px-4 py-8 sm:py-10">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="page-shell mx-auto max-w-[1200px] px-4 py-8 sm:py-10">
+      <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium text-text">
+          <div className="accent-bar mb-4" />
+          <h1 className="text-3xl font-semibold tracking-tight text-text">
             Admin Dashboard
           </h1>
-          <p className="text-text-muted mt-1">
+          <p className="text-text-muted mt-2">
             Manage registered teams and registration settings.
           </p>
         </div>
@@ -94,7 +95,7 @@ export function AdminDashboard() {
 
         <section>
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-display text-xl font-medium text-text">
+            <h2 className="text-xl font-semibold text-text">
               Registered Teams
             </h2>
             <div className="flex items-center gap-3">
@@ -103,7 +104,7 @@ export function AdminDashboard() {
                 onClick={handleDownloadStart}
                 aria-disabled={exporting}
                 className={cn(
-                  "inline-flex items-center justify-center gap-2 min-h-11 px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium transition-colors duration-[var(--duration-fast)] focus:outline-none focus:ring-2 focus:ring-primary/30 border border-border bg-surface text-text hover:bg-bg",
+                  "inline-flex items-center justify-center gap-2 min-h-11 px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium transition-colors duration-[var(--duration-fast)] focus:outline-none focus:ring-2 focus:ring-primary/20 border border-border bg-surface text-text hover:bg-bg",
                   exporting && "pointer-events-none opacity-50",
                 )}
               >
