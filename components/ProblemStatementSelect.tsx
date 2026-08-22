@@ -42,7 +42,6 @@ function StatementMeta({ statement }: { statement: ProblemStatement }) {
     <div className="mt-2 flex flex-wrap gap-1.5">
       <MetaChip label="Category" value={statement.category} />
       <MetaChip label="Theme" value={statement.theme} />
-      <MetaChip label="Deadline" value={statement.deadline} />
       {statement.psNumber ? (
         <MetaChip label="PS" value={statement.psNumber} />
       ) : null}
