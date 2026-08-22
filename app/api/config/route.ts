@@ -6,7 +6,11 @@ export async function GET() {
   try {
     await connectDB();
     const config = await getOrCreateConfig();
-    return NextResponse.json(toPublicConfig(config));
+    return NextResponse.json(toPublicConfig(config), {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    });
   } catch (error) {
     console.error("GET /api/config failed:", error);
     const message =

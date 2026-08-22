@@ -38,6 +38,7 @@ export async function POST(request: Request) {
       maxTeamSize: config.maxTeamSize,
       minFemaleMembers: config.minFemaleMembers,
       allowedEmailDomain: config.allowedEmailDomain,
+      problemStatements: config.problemStatements ?? [],
     });
 
     const parsed = schema.safeParse(payload);

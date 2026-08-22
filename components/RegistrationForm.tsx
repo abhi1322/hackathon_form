@@ -13,6 +13,7 @@ import {
   FieldError,
   Input,
   Label,
+  Select,
 } from "@/components/ui/form";
 import {
   interpolateSuccessMessage,
@@ -57,9 +58,11 @@ export function RegistrationForm() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadConfig() {
       try {
-        const response = await fetch("/api/config");
+        const response = await fetch("/api/config", { cache: "no-store" });
         const data = await response.json();
         if (!response.ok) {
           throw new Error(
@@ -68,20 +71,38 @@ export function RegistrationForm() {
               : "Unable to load registration settings.",
           );
         }
-        setConfig(data as PublicConfig);
+        if (!cancelled) {
+          setConfig(data as PublicConfig);
+        }
       } catch (error) {
         console.error(error);
-        setSubmitError(
-          error instanceof Error
-            ? error.message
-            : "Unable to load registration settings.",
-        );
+        if (!cancelled) {
+          setSubmitError(
+            error instanceof Error
+              ? error.message
+              : "Unable to load registration settings.",
+          );
+        }
       } finally {
-        setLoadingConfig(false);
+        if (!cancelled) {
+          setLoadingConfig(false);
+        }
       }
     }
 
     loadConfig();
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        loadConfig();
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   const schema = useMemo(() => {
@@ -102,6 +123,7 @@ export function RegistrationForm() {
     mode: "onChange",
     defaultValues: {
       teamName: "",
+      problemStatement: "",
       members: [],
     },
   });
@@ -116,6 +138,7 @@ export function RegistrationForm() {
 
     reset({
       teamName: "",
+      problemStatement: "",
       members: Array.from({ length: config.minTeamSize }, emptyMember),
     });
   }, [config, reset]);
@@ -129,8 +152,12 @@ export function RegistrationForm() {
   const canAddMember = config ? memberCount < config.maxTeamSize : false;
   const canRemoveMember = config ? memberCount > config.minTeamSize : false;
 
+  const problemStatementsConfigured =
+    (config?.problemStatements?.length ?? 0) > 0;
+
   const constraintsMet =
     !!config &&
+    problemStatementsConfigured &&
     memberCount >= config.minTeamSize &&
     memberCount <= config.maxTeamSize &&
     femaleCount >= config.minFemaleMembers;
@@ -229,6 +256,33 @@ export function RegistrationForm() {
           <FieldError message={errors.teamName?.message} />
         </Card>
 
+        <Card>
+          <Label htmlFor="problemStatement">Problem Statement</Label>
+          {problemStatementsConfigured ? (
+            <>
+              <Select
+                id="problemStatement"
+                defaultValue=""
+                {...register("problemStatement")}
+              >
+                <option value="" disabled>
+                  Select a problem statement
+                </option>
+                {config.problemStatements.map((statement) => (
+                  <option key={statement} value={statement}>
+                    {statement}
+                  </option>
+                ))}
+              </Select>
+              <FieldError message={errors.problemStatement?.message} />
+            </>
+          ) : (
+            <p className="text-sm text-text-muted">
+              Problem statements not configured yet.
+            </p>
+          )}
+        </Card>
+
         <div className="space-y-4">
           <AnimatePresence initial={false}>
             {fields.map((field, index) => (
@@ -278,7 +332,9 @@ export function RegistrationForm() {
         <Button
           type="submit"
           className="w-full"
-          disabled={!isValid || !constraintsMet || submitting}
+          disabled={
+            !isValid || !constraintsMet || submitting || !problemStatementsConfigured
+          }
         >
           {submitting ? (
             <>

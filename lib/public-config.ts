@@ -25,6 +25,7 @@ export type PublicConfig = {
   successTitle: string;
   successMessage: string;
   submitButtonText: string;
+  problemStatements: string[];
 };
 
 export function interpolateSuccessMessage(

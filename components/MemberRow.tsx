@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/form";
 import { buildEmailDomainRegex } from "@/lib/normalize";
 import type { PublicConfig } from "@/lib/public-config";
-import type { MemberInput } from "@/lib/schemas/registration";
+import type { RegistrationInput } from "@/lib/schemas/registration";
 import type {
   FieldErrors,
   UseFormRegister,
@@ -24,11 +24,11 @@ interface MemberRowProps {
   isLeader: boolean;
   canRemove: boolean;
   config: PublicConfig;
-  register: UseFormRegister<{ teamName: string; members: MemberInput[] }>;
-  errors: FieldErrors<{ teamName: string; members: MemberInput[] }>;
+  register: UseFormRegister<RegistrationInput>;
+  errors: FieldErrors<RegistrationInput>;
   onRemove: () => void;
-  setError: UseFormSetError<{ teamName: string; members: MemberInput[] }>;
-  clearErrors: UseFormClearErrors<{ teamName: string; members: MemberInput[] }>;
+  setError: UseFormSetError<RegistrationInput>;
+  clearErrors: UseFormClearErrors<RegistrationInput>;
 }
 
 export function MemberRow({

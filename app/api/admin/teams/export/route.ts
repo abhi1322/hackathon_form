@@ -14,6 +14,7 @@ export async function GET() {
 
     const worksheetRows = rows.map((row) => ({
       "Team Name": row.teamName,
+      "Problem Statement": row.problemStatement,
       "Student Name": row.studentName,
       Email: row.email,
       "Phone Number": row.phone,
@@ -22,6 +23,7 @@ export async function GET() {
     const worksheet = XLSX.utils.json_to_sheet(worksheetRows);
     worksheet["!cols"] = [
       { wch: 24 },
+      { wch: 32 },
       { wch: 28 },
       { wch: 32 },
       { wch: 16 },

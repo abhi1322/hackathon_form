@@ -116,6 +116,7 @@ export async function createTeamWithMembers(
         normalizedName: normalizeTeamName(payload.teamName),
         memberCount: payload.members.length,
         femaleCount,
+        problemStatement: payload.problemStatement.trim(),
       },
     ],
     { session },
@@ -164,6 +165,7 @@ export async function replaceTeamMembers(
       normalizedName: normalizeTeamName(payload.teamName),
       memberCount: payload.members.length,
       femaleCount,
+      problemStatement: payload.problemStatement.trim(),
     },
     { session },
   );

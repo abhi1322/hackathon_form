@@ -7,6 +7,10 @@ import {
   type ConfigDocument,
 } from "@/lib/models/Config";
 import {
+  mergeProblemStatements,
+  parseBulkProblemStatements,
+} from "@/lib/problem-statements";
+import {
   adminConfigUpdateSchema,
   type AdminConfigUpdate,
 } from "@/lib/schemas/registration";
@@ -34,7 +38,7 @@ export async function PATCH(request: Request) {
 
   try {
     await connectDB();
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
     const parsed = adminConfigUpdateSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -45,7 +49,7 @@ export async function PATCH(request: Request) {
     }
 
     const config = await getOrCreateConfig();
-    applyConfigUpdates(config, parsed.data);
+    applyConfigUpdates(config, parsed.data, body);
     await config.save();
 
     return NextResponse.json(toPublicConfig(config));
@@ -58,7 +62,11 @@ export async function PATCH(request: Request) {
   }
 }
 
-function applyConfigUpdates(config: ConfigDocument, updates: AdminConfigUpdate) {
+function applyConfigUpdates(
+  config: ConfigDocument,
+  updates: AdminConfigUpdate,
+  rawBody: Record<string, unknown>,
+) {
   const fields: Array<keyof AdminConfigUpdate> = [
     "minTeamSize",
     "maxTeamSize",
@@ -79,6 +87,20 @@ function applyConfigUpdates(config: ConfigDocument, updates: AdminConfigUpdate) 
     if (updates[field] !== undefined) {
       config.set(field, updates[field]);
     }
+  }
+
+  const hasProblemStatementUpdate =
+    "problemStatements" in rawBody || "bulkProblemStatements" in rawBody;
+
+  if (hasProblemStatementUpdate) {
+    const base = updates.problemStatements ?? config.problemStatements ?? [];
+    const bulkStatements = updates.bulkProblemStatements
+      ? parseBulkProblemStatements(updates.bulkProblemStatements)
+      : [];
+    const merged = mergeProblemStatements(base, bulkStatements);
+
+    config.set("problemStatements", merged);
+    config.markModified("problemStatements");
   }
 
   if (config.minTeamSize > config.maxTeamSize) {

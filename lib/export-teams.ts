@@ -3,6 +3,7 @@ import { Team } from "@/lib/models/Team";
 
 export interface ExportTeamRow {
   teamName: string;
+  problemStatement: string;
   studentName: string;
   email: string;
   phone: string;
@@ -19,6 +20,12 @@ export async function getAllTeamsForExport(): Promise<ExportTeamRow[]> {
   const teamNameById = new Map(
     teams.map((team) => [team._id.toString(), team.name]),
   );
+  const problemStatementById = new Map(
+    teams.map((team) => [
+      team._id.toString(),
+      team.problemStatement ?? "",
+    ]),
+  );
 
   const rows: ExportTeamRow[] = [];
 
@@ -30,6 +37,10 @@ export async function getAllTeamsForExport(): Promise<ExportTeamRow[]> {
     for (const member of teamMembers) {
       rows.push({
         teamName: teamNameById.get(team._id.toString()) ?? team.name,
+        problemStatement:
+          problemStatementById.get(team._id.toString()) ??
+          team.problemStatement ??
+          "",
         studentName: member.name,
         email: member.email,
         phone: member.phone,

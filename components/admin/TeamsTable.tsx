@@ -53,9 +53,8 @@ export function TeamsTable({
   }
 
   return (
-    <>
-      <div className="rounded-[var(--radius-lg)] border border-border bg-surface overflow-hidden">
-        <div className="border-b border-border p-4">
+    <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface">
+      <div className="border-b border-border p-4">
           <Input
             placeholder="Search by team name, member name, email, or registration ID"
             value={searchQuery}
@@ -68,6 +67,7 @@ export function TeamsTable({
             <thead className="bg-bg text-left text-text-muted">
               <tr>
                 <th className="px-4 py-3 font-medium">Team</th>
+                <th className="px-4 py-3 font-medium">Problem Statement</th>
                 <th className="px-4 py-3 font-medium">Members</th>
                 <th className="px-4 py-3 font-medium">Female</th>
                 <th className="px-4 py-3 font-medium">Registered</th>
@@ -77,7 +77,7 @@ export function TeamsTable({
             <tbody>
               {teams.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-text-muted">
+                  <td colSpan={6} className="px-4 py-8 text-center text-text-muted">
                     No teams found.
                   </td>
                 </tr>
@@ -105,6 +105,9 @@ export function TeamsTable({
                             )}
                             {team.name}
                           </button>
+                        </td>
+                        <td className="px-4 py-3 text-text-muted max-w-[14rem] truncate">
+                          {team.problemStatement || "—"}
                         </td>
                         <td className="px-4 py-3">{team.memberCount}</td>
                         <td className="px-4 py-3">
@@ -146,7 +149,15 @@ export function TeamsTable({
                       </tr>
                       {expanded && (
                         <tr className="border-t border-border bg-bg/40">
-                          <td colSpan={5} className="px-4 py-4">
+                          <td colSpan={6} className="px-4 py-4">
+                            {team.problemStatement && (
+                              <p className="mb-3 text-sm text-text-muted">
+                                <span className="font-medium text-text">
+                                  Problem Statement:
+                                </span>{" "}
+                                {team.problemStatement}
+                              </p>
+                            )}
                             <div className="grid gap-3">
                               {team.members.map((member) => (
                                 <div
@@ -173,7 +184,6 @@ export function TeamsTable({
             </tbody>
           </table>
         </div>
-      </div>
 
       {editingTeam && config && (
         <EditTeamModal
@@ -183,6 +193,6 @@ export function TeamsTable({
           onSaved={onRefresh}
         />
       )}
-    </>
+    </div>
   );
 }

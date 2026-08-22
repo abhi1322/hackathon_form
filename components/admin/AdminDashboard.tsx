@@ -2,7 +2,12 @@
 
 import { Download, Loader2, LogOut } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  AdminTabPanel,
+  AdminTabs,
+  type AdminTab,
+} from "@/components/admin/AdminTabs";
 import { SettingsPanel } from "@/components/admin/SettingsPanel";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { TeamsTable } from "@/components/admin/TeamsTable";
@@ -20,8 +25,19 @@ interface StatsData {
   minFemaleMembers: number;
 }
 
+function parseTab(value: string | null): AdminTab {
+  if (value === "teams" || value === "settings" || value === "overview") {
+    return value;
+  }
+  return "overview";
+}
+
 export function AdminDashboard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<AdminTab>(() =>
+    parseTab(searchParams.get("tab")),
+  );
   const [stats, setStats] = useState<StatsData | null>(null);
   const [teams, setTeams] = useState<TeamRecord[]>([]);
   const [config, setConfig] = useState<PublicConfig | null>(null);
@@ -53,12 +69,21 @@ export function AdminDashboard() {
   }, [searchQuery]);
 
   useEffect(() => {
+    setActiveTab(parseTab(searchParams.get("tab")));
+  }, [searchParams]);
+
+  useEffect(() => {
     const timeout = setTimeout(() => {
       loadDashboard(searchQuery);
     }, 300);
 
     return () => clearTimeout(timeout);
   }, [searchQuery, loadDashboard]);
+
+  function handleTabChange(tab: AdminTab) {
+    setActiveTab(tab);
+    router.replace(`/admin?tab=${tab}`, { scroll: false });
+  }
 
   async function handleLogout() {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -74,14 +99,14 @@ export function AdminDashboard() {
 
   return (
     <div className="page-shell mx-auto max-w-[1200px] px-4 py-8 sm:py-10">
-      <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="accent-bar mb-4" />
           <h1 className="text-3xl font-semibold tracking-tight text-text">
             Admin Dashboard
           </h1>
           <p className="text-text-muted mt-2">
-            Manage registered teams and registration settings.
+            Manage teams, review stats, and configure registration.
           </p>
         </div>
         <Button type="button" variant="secondary" onClick={handleLogout}>
@@ -90,48 +115,72 @@ export function AdminDashboard() {
         </Button>
       </div>
 
-      <div className="space-y-8">
-        <StatsCards stats={stats} />
+      <div className="mb-6">
+        <AdminTabs activeTab={activeTab} onChange={handleTabChange} />
+      </div>
 
-        <section>
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-xl font-semibold text-text">
-              Registered Teams
-            </h2>
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleDownloadStart}
-                disabled={exporting}
-              >
-                {exporting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Preparing...
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4" />
-                    Download Excel
-                  </>
+      <div className="space-y-6">
+        {activeTab === "overview" && (
+          <AdminTabPanel
+            title="Overview"
+            description="Key registration metrics and quota audit summary."
+          >
+            <StatsCards stats={stats} />
+            {stats && (
+              <p className="mt-5 text-sm text-text-muted">
+                {stats.totalTeams} team{stats.totalTeams === 1 ? "" : "s"}{" "}
+                registered with {stats.totalParticipants} total participants.
+                {stats.teamsNotMeetingQuota > 0
+                  ? ` ${stats.teamsNotMeetingQuota} team(s) are below the female quota minimum.`
+                  : " All teams currently meet the female quota."}
+              </p>
+            )}
+          </AdminTabPanel>
+        )}
+
+        {activeTab === "teams" && (
+          <AdminTabPanel
+            title="Registered Teams"
+            description="Search teams, view member details, edit entries, or export data."
+            actions={
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleDownloadStart}
+                  disabled={exporting}
+                >
+                  {exporting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Preparing...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      Download Excel
+                    </>
+                  )}
+                </Button>
+                {loading && (
+                  <Loader2 className="h-4 w-4 animate-spin text-text-muted" />
                 )}
-              </Button>
-              {loading && (
-                <Loader2 className="h-4 w-4 animate-spin text-text-muted" />
-              )}
-            </div>
-          </div>
-          <TeamsTable
-            teams={teams}
-            config={config}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onRefresh={() => loadDashboard(searchQuery)}
-          />
-        </section>
+              </>
+            }
+          >
+            <TeamsTable
+              teams={teams}
+              config={config}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onRefresh={() => loadDashboard(searchQuery)}
+            />
+          </AdminTabPanel>
+        )}
 
-        <SettingsPanel onUpdated={() => loadDashboard(searchQuery)} />
+        {activeTab === "settings" && (
+          <SettingsPanel onUpdated={() => loadDashboard(searchQuery)} embedded />
+        )}
       </div>
     </div>
   );

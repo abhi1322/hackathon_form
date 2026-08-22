@@ -66,6 +66,11 @@ const configSchema = new Schema(
       default: DEFAULT_FORM_COPY.submitButtonText,
       trim: true,
     },
+    problemStatements: {
+      type: [String],
+      required: true,
+      default: [],
+    },
   },
   { timestamps: true },
 );
@@ -96,6 +101,7 @@ export function toPublicConfig(config: IConfig): PublicConfig {
     successMessage: config.successMessage ?? DEFAULT_FORM_COPY.successMessage,
     submitButtonText:
       config.submitButtonText ?? DEFAULT_FORM_COPY.submitButtonText,
+    problemStatements: config.problemStatements ?? [],
   };
 }
 
@@ -112,6 +118,13 @@ export async function getOrCreateConfig(): Promise<ConfigDocument> {
       config.set(key, value);
       changed = true;
     }
+  }
+
+  const problemStatements = config.get("problemStatements");
+  if (problemStatements === undefined || !Array.isArray(problemStatements)) {
+    config.set("problemStatements", []);
+    config.markModified("problemStatements");
+    changed = true;
   }
 
   if (changed) {

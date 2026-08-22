@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { buildEmailDomainRegex } from "@/lib/normalize";
+import { isValidProblemStatement } from "@/lib/problem-statements";
 
 export const genderEnum = z.enum(["Male", "Female", "Other"]);
 
@@ -8,6 +9,11 @@ export type RegistrationConfig = {
   maxTeamSize: number;
   minFemaleMembers: number;
   allowedEmailDomain: string;
+  problemStatements: string[];
+};
+
+type RegistrationSchemaOptions = {
+  legacyProblemStatement?: string;
 };
 
 export function createMemberSchema(allowedEmailDomain: string) {
@@ -36,7 +42,10 @@ export function createMemberSchema(allowedEmailDomain: string) {
   });
 }
 
-export function createRegistrationSchema(config: RegistrationConfig) {
+export function createRegistrationSchema(
+  config: RegistrationConfig,
+  options: RegistrationSchemaOptions = {},
+) {
   const memberSchema = createMemberSchema(config.allowedEmailDomain);
 
   return z
@@ -46,9 +55,33 @@ export function createRegistrationSchema(config: RegistrationConfig) {
         .trim()
         .min(2, "Team name must be at least 2 characters")
         .max(80, "Team name is too long"),
+      problemStatement: z.string().trim(),
       members: z.array(memberSchema),
     })
     .superRefine((data, ctx) => {
+      if (config.problemStatements.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Problem statements are not configured yet",
+          path: ["problemStatement"],
+        });
+        return;
+      }
+
+      if (
+        !isValidProblemStatement(
+          data.problemStatement,
+          config.problemStatements,
+          options.legacyProblemStatement,
+        )
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Select a valid problem statement",
+          path: ["problemStatement"],
+        });
+      }
+
       if (data.members.length < config.minTeamSize) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -144,6 +177,11 @@ export const adminConfigUpdateSchema = z
     successTitle: z.string().trim().min(1).max(120).optional(),
     successMessage: z.string().trim().min(1).max(500).optional(),
     submitButtonText: z.string().trim().min(1).max(80).optional(),
+    problemStatements: z
+      .array(z.string().trim().min(1).max(200))
+      .max(100)
+      .optional(),
+    bulkProblemStatements: z.string().max(5000).optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -160,3 +198,9 @@ export const adminConfigUpdateSchema = z
   });
 
 export type AdminConfigUpdate = z.infer<typeof adminConfigUpdateSchema>;
+
+export function toRegistrationConfig(
+  config: RegistrationConfig,
+): RegistrationConfig {
+  return config;
+}

@@ -6,7 +6,7 @@ import { Loader2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { MemberRow } from "@/components/MemberRow";
-import { Button, FieldError, Input, Label } from "@/components/ui/form";
+import { Button, FieldError, Input, Label, Select } from "@/components/ui/form";
 import type { PublicConfig } from "@/lib/public-config";
 import {
   createRegistrationSchema,
@@ -18,6 +18,7 @@ export interface TeamRecord {
   name: string;
   memberCount: number;
   femaleCount: number;
+  problemStatement: string;
   createdAt: string;
   members: Array<{
     id: string;
@@ -46,9 +47,21 @@ export function EditTeamModal({
   const [saving, setSaving] = useState(false);
 
   const schema = useMemo(
-    () => createRegistrationSchema(config),
-    [config],
+    () =>
+      createRegistrationSchema(config, {
+        legacyProblemStatement: team.problemStatement,
+      }),
+    [config, team.problemStatement],
   );
+
+  const problemStatementOptions = useMemo(() => {
+    const options = [...config.problemStatements];
+    const legacy = team.problemStatement.trim();
+    if (legacy && !options.includes(legacy)) {
+      options.unshift(legacy);
+    }
+    return options;
+  }, [config.problemStatements, team.problemStatement]);
 
   const {
     register,
@@ -62,6 +75,7 @@ export function EditTeamModal({
     mode: "onChange",
     defaultValues: {
       teamName: team.name,
+      problemStatement: team.problemStatement,
       members: team.members.map((member) => ({
         name: member.name,
         email: member.email,
@@ -138,6 +152,32 @@ export function EditTeamModal({
             <Label htmlFor="edit-teamName">Team Name</Label>
             <Input id="edit-teamName" {...register("teamName")} />
             <FieldError message={errors.teamName?.message} />
+          </div>
+
+          <div>
+            <Label htmlFor="edit-problemStatement">Problem Statement</Label>
+            {problemStatementOptions.length > 0 ? (
+              <>
+                <Select
+                  id="edit-problemStatement"
+                  {...register("problemStatement")}
+                >
+                  <option value="" disabled>
+                    Select a problem statement
+                  </option>
+                  {problemStatementOptions.map((statement) => (
+                    <option key={statement} value={statement}>
+                      {statement}
+                    </option>
+                  ))}
+                </Select>
+                <FieldError message={errors.problemStatement?.message} />
+              </>
+            ) : (
+              <p className="text-sm text-text-muted">
+                Problem statements not configured yet.
+              </p>
+            )}
           </div>
 
           <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">

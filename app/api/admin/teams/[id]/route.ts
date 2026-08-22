@@ -36,6 +36,7 @@ export async function GET(_request: Request, context: RouteContext) {
       name: team.name,
       memberCount: team.memberCount,
       femaleCount: team.femaleCount,
+      problemStatement: team.problemStatement ?? "",
       createdAt: team.createdAt,
       members: members.map((member) => ({
         id: member._id.toString(),
@@ -73,12 +74,16 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const config = await getOrCreateConfig();
-    const schema = createRegistrationSchema({
-      minTeamSize: config.minTeamSize,
-      maxTeamSize: config.maxTeamSize,
-      minFemaleMembers: config.minFemaleMembers,
-      allowedEmailDomain: config.allowedEmailDomain,
-    });
+    const schema = createRegistrationSchema(
+      {
+        minTeamSize: config.minTeamSize,
+        maxTeamSize: config.maxTeamSize,
+        minFemaleMembers: config.minFemaleMembers,
+        allowedEmailDomain: config.allowedEmailDomain,
+        problemStatements: config.problemStatements ?? [],
+      },
+      { legacyProblemStatement: existingTeam.problemStatement ?? "" },
+    );
 
     const parsed = schema.safeParse(payload);
     if (!parsed.success) {

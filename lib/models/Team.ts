@@ -6,6 +6,7 @@ const teamSchema = new Schema(
     normalizedName: { type: String, required: true, trim: true, unique: true },
     memberCount: { type: Number, required: true, min: 0 },
     femaleCount: { type: Number, required: true, min: 0 },
+    problemStatement: { type: String, required: true, default: "", trim: true },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );
