@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+import { requireAdminApiAuth } from "@/lib/admin-api-auth";
 import { connectDB } from "@/lib/db";
 import { Participant } from "@/lib/models/Participant";
 import { Team } from "@/lib/models/Team";
 import { normalizeRegistrationId } from "@/lib/normalize";
 
 export async function GET(request: Request) {
+  const unauthorized = await requireAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     await connectDB();
     const { searchParams } = new URL(request.url);

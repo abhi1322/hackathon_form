@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
+import { requireAdminApiAuth } from "@/lib/admin-api-auth";
 import { connectDB } from "@/lib/db";
 import {
   deleteTeamWithMembers,
@@ -16,6 +17,9 @@ interface RouteContext {
 }
 
 export async function GET(_request: Request, context: RouteContext) {
+  const unauthorized = await requireAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     await connectDB();
     const { id } = await context.params;
@@ -49,6 +53,9 @@ export async function GET(_request: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
+  const unauthorized = await requireAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   let payload: unknown;
   let validatedPayload:
     | import("@/lib/schemas/registration").RegistrationInput
@@ -108,6 +115,9 @@ export async function PATCH(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(_request: Request, context: RouteContext) {
+  const unauthorized = await requireAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   const session = await mongoose.startSession();
 
   try {

@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import * as XLSX from "xlsx";
+import { requireAdminApiAuth } from "@/lib/admin-api-auth";
 import { connectDB } from "@/lib/db";
 import { getAllTeamsForExport } from "@/lib/export-teams";
 
 export async function GET() {
+  const unauthorized = await requireAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     await connectDB();
     const rows = await getAllTeamsForExport();

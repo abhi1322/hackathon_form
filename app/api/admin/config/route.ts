@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdminApiAuth } from "@/lib/admin-api-auth";
 import { connectDB } from "@/lib/db";
 import {
   getOrCreateConfig,
@@ -8,6 +9,9 @@ import {
 import { adminConfigUpdateSchema } from "@/lib/schemas/registration";
 
 export async function GET() {
+  const unauthorized = await requireAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     await connectDB();
     const config = await getOrCreateConfig();
@@ -22,6 +26,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  const unauthorized = await requireAdminApiAuth();
+  if (unauthorized) return unauthorized;
+
   try {
     await connectDB();
     const body = await request.json();

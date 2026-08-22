@@ -2,16 +2,6 @@ import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  throw new Error("Please define MONGODB_URI in .env.local");
-}
-
-if (MONGODB_URI.includes("<db_username>") || MONGODB_URI.includes("USER:PASS")) {
-  throw new Error(
-    "MONGODB_URI still contains placeholder credentials. Replace them with your real MongoDB Atlas username and password in .env.local, then restart the dev server.",
-  );
-}
-
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
@@ -49,6 +39,19 @@ function getConnectionErrorMessage(error: unknown): string {
 }
 
 export async function connectDB(): Promise<typeof mongoose> {
+  if (!MONGODB_URI) {
+    throw new Error("Please define MONGODB_URI in your environment variables.");
+  }
+
+  if (
+    MONGODB_URI.includes("<db_username>") ||
+    MONGODB_URI.includes("USER:PASS")
+  ) {
+    throw new Error(
+      "MONGODB_URI still contains placeholder credentials. Replace them with your real MongoDB Atlas username and password.",
+    );
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
