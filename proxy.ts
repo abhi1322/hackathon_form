@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminCookieName, verifyAdminToken } from "./lib/auth-edge";
+import { jwtVerify } from "jose";
 
+const COOKIE_NAME = "admin_token";
 const PUBLIC_ADMIN_PATHS = ["/admin/login", "/api/admin/login"];
 
-export async function middleware(request: NextRequest) {
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET is not configured");
+  }
+  return new TextEncoder().encode(secret);
+}
+
+async function verifyAdminToken(token: string) {
+  const { payload } = await jwtVerify(token, getJwtSecret());
+  return payload;
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isAdminPage = pathname.startsWith("/admin");
@@ -17,7 +31,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get(getAdminCookieName())?.value;
+  const token = request.cookies.get(COOKIE_NAME)?.value;
 
   if (!token) {
     return unauthorizedResponse(request, isAdminApi);

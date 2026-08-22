@@ -45,7 +45,19 @@ mongosh --eval "rs.initiate()"
 - `components/` — Registration form and admin UI
 - `lib/models/` — Mongoose models and indexes
 - `lib/schemas/` — Shared Zod validation
-- `middleware.ts` — Admin route protection
+- `proxy.ts` — Admin route protection
+
+## Vercel Deployment
+
+1. Import the GitHub repo in Vercel.
+2. Set **Root Directory** to empty (repo root). Do not use `hackathon-form-temp`.
+3. Set **Framework Preset** to **Next.js**.
+4. Add environment variables in Vercel → Settings → Environment Variables:
+   - `MONGODB_URI`
+   - `JWT_SECRET`
+   - `ADMIN_EMAIL`
+   - `ADMIN_PASSWORD`
+5. Redeploy after env vars are saved.
 
 ## Default Config
 
