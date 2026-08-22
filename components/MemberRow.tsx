@@ -123,8 +123,25 @@ export function MemberRow({
             </Label>
             <Input
               id={`members.${index}.registrationId`}
-              placeholder="University ID"
-              {...register(`members.${index}.registrationId`)}
+              placeholder="GF202346252"
+              maxLength={11}
+              autoCapitalize="characters"
+              spellCheck={false}
+              className="uppercase tracking-wide"
+              {...register(`members.${index}.registrationId`, {
+                setValueAs: (value: string) =>
+                  value.trim().replace(/\s+/g, "").toUpperCase(),
+                onChange: (event) => {
+                  const input = event.target as HTMLInputElement;
+                  const cleaned = input.value
+                    .replace(/\s+/g, "")
+                    .toUpperCase()
+                    .slice(0, 11);
+                  if (input.value !== cleaned) {
+                    input.value = cleaned;
+                  }
+                },
+              })}
             />
             <FieldError message={memberErrors?.registrationId?.message} />
           </div>
