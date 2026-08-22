@@ -7,7 +7,6 @@ import { SettingsPanel } from "@/components/admin/SettingsPanel";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { TeamsTable } from "@/components/admin/TeamsTable";
 import { Button } from "@/components/ui/form";
-import { cn } from "@/lib/cn";
 import type { PublicConfig } from "@/lib/models/Config";
 import type { TeamRecord } from "@/components/admin/EditTeamModal";
 
@@ -69,6 +68,7 @@ export function AdminDashboard() {
 
   function handleDownloadStart() {
     setExporting(true);
+    window.location.href = "/api/admin/teams/export";
     window.setTimeout(() => setExporting(false), 2000);
   }
 
@@ -99,14 +99,11 @@ export function AdminDashboard() {
               Registered Teams
             </h2>
             <div className="flex items-center gap-3">
-              <a
-                href="/api/admin/teams/export"
+              <Button
+                type="button"
+                variant="secondary"
                 onClick={handleDownloadStart}
-                aria-disabled={exporting}
-                className={cn(
-                  "inline-flex items-center justify-center gap-2 min-h-11 px-4 py-2 rounded-[var(--radius-md)] text-sm font-medium transition-colors duration-[var(--duration-fast)] focus:outline-none focus:ring-2 focus:ring-primary/20 border border-border bg-surface text-text hover:bg-bg",
-                  exporting && "pointer-events-none opacity-50",
-                )}
+                disabled={exporting}
               >
                 {exporting ? (
                   <>
@@ -119,7 +116,7 @@ export function AdminDashboard() {
                     Download Excel
                   </>
                 )}
-              </a>
+              </Button>
               {loading && (
                 <Loader2 className="h-4 w-4 animate-spin text-text-muted" />
               )}
