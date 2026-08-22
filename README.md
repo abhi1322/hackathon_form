@@ -45,7 +45,7 @@ mongosh --eval "rs.initiate()"
 - `components/` — Registration form and admin UI
 - `lib/models/` — Mongoose models and indexes
 - `lib/schemas/` — Shared Zod validation
-- `proxy.ts` — Admin route protection
+- `lib/admin-api-auth.ts` — Server-side admin auth for pages and API routes
 
 ## Vercel Deployment
 

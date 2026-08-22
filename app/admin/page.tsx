@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import { getAdminSession } from "@/lib/admin-api-auth";
 
 function AdminDashboardFallback() {
   return (
@@ -10,7 +12,13 @@ function AdminDashboardFallback() {
   );
 }
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const session = await getAdminSession();
+
+  if (!session) {
+    redirect("/admin/login");
+  }
+
   return (
     <main className="page-shell min-h-screen">
       <Suspense fallback={<AdminDashboardFallback />}>
