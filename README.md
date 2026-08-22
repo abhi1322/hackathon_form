@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# hackathon_form
+
+# Hackathon Team Registration
+
+Full-stack hackathon team registration app built with Next.js, Tailwind CSS, and MongoDB (Mongoose).
+
+## Features
+
+- Google Forms-style dynamic team registration with add/remove member rows
+- Live validation for team size, female quota, and university email domain
+- MongoDB-enforced uniqueness for team names, emails, and registration IDs
+- Transactional team creation to prevent partial saves
+- JWT-protected admin dashboard with search, stats, settings, edit, and delete
 
 ## Getting Started
 
-First, run the development server:
+1. Copy environment variables:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Update `.env.local` with your MongoDB URI and admin credentials.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Install dependencies and run the dev server:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+4. Open [http://localhost:3000](http://localhost:3000) for registration and [http://localhost:3000/admin/login](http://localhost:3000/admin/login) for admin access.
 
-To learn more about Next.js, take a look at the following resources:
+## MongoDB Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+MongoDB transactions require a replica set. MongoDB Atlas works out of the box. For local MongoDB, initialize a replica set before using registration:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+mongosh --eval "rs.initiate()"
+```
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `app/` — Next.js routes and API endpoints
+- `components/` — Registration form and admin UI
+- `lib/models/` — Mongoose models and indexes
+- `lib/schemas/` — Shared Zod validation
+- `middleware.ts` — Admin route protection
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Default Config
+
+On first run, the app creates a config document with:
+
+- Min team size: 2
+- Max team size: 4
+- Min female members: 1
+- Allowed email domain: `shoolini.edu.in`
+- Registration open: true
+
+These can be changed from the admin settings panel.
