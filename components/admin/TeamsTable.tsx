@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { Fragment, useState } from "react";
 import { Button, Input } from "@/components/ui/form";
 import { cn } from "@/lib/cn";
-import type { PublicConfig } from "@/lib/models/Config";
+import type { PublicConfig } from "@/lib/public-config";
 import { EditTeamModal, type TeamRecord } from "@/components/admin/EditTeamModal";
 
 interface TeamsTableProps {

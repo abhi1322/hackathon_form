@@ -17,7 +17,7 @@ import {
 import {
   interpolateSuccessMessage,
   type PublicConfig,
-} from "@/lib/models/Config";
+} from "@/lib/public-config";
 import {
   createRegistrationSchema,
   type MemberInput,

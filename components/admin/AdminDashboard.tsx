@@ -7,7 +7,7 @@ import { SettingsPanel } from "@/components/admin/SettingsPanel";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { TeamsTable } from "@/components/admin/TeamsTable";
 import { Button } from "@/components/ui/form";
-import type { PublicConfig } from "@/lib/models/Config";
+import type { PublicConfig } from "@/lib/public-config";
 import type { TeamRecord } from "@/components/admin/EditTeamModal";
 
 interface StatsData {

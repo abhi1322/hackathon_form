@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { MemberRow } from "@/components/MemberRow";
 import { Button, FieldError, Input, Label } from "@/components/ui/form";
-import type { PublicConfig } from "@/lib/models/Config";
+import type { PublicConfig } from "@/lib/public-config";
 import {
   createRegistrationSchema,
   type RegistrationInput,

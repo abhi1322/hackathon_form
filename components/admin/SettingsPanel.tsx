@@ -10,7 +10,7 @@ import {
   SectionDivider,
   Textarea,
 } from "@/components/ui/form";
-import type { PublicConfig } from "@/lib/models/Config";
+import type { PublicConfig } from "@/lib/public-config";
 
 interface SettingsPanelProps {
   onUpdated: () => void;

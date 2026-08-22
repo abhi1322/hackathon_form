@@ -10,7 +10,7 @@ import {
   Select,
 } from "@/components/ui/form";
 import { buildEmailDomainRegex } from "@/lib/normalize";
-import type { PublicConfig } from "@/lib/models/Config";
+import type { PublicConfig } from "@/lib/public-config";
 import type { MemberInput } from "@/lib/schemas/registration";
 import type {
   FieldErrors,

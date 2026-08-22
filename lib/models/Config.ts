@@ -1,17 +1,10 @@
 import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
+import {
+  DEFAULT_FORM_COPY,
+  type PublicConfig,
+} from "@/lib/public-config";
 
-export const DEFAULT_FORM_COPY = {
-  formEyebrow: "Hackathon 2026",
-  formTitle: "Team Registration",
-  formDescription:
-    "Register your team for the hackathon. Add members dynamically and ensure all requirements are met before submitting.",
-  closedTitle: "Registration Closed",
-  closedMessage:
-    "Team registration is not open at this time. Please check back later.",
-  successTitle: "Registration Successful",
-  successMessage: "Team {teamName} has been registered successfully.",
-  submitButtonText: "Submit Registration",
-} as const;
+export { DEFAULT_FORM_COPY, type PublicConfig };
 
 const configSchema = new Schema(
   {
@@ -87,22 +80,6 @@ export const Config: Model<ConfigDocument> =
   mongoose.models.Config ??
   mongoose.model<ConfigDocument>("Config", configSchema);
 
-export type PublicConfig = {
-  minTeamSize: number;
-  maxTeamSize: number;
-  minFemaleMembers: number;
-  allowedEmailDomain: string;
-  registrationOpen: boolean;
-  formEyebrow: string;
-  formTitle: string;
-  formDescription: string;
-  closedTitle: string;
-  closedMessage: string;
-  successTitle: string;
-  successMessage: string;
-  submitButtonText: string;
-};
-
 export function toPublicConfig(config: IConfig): PublicConfig {
   return {
     minTeamSize: config.minTeamSize,
@@ -142,11 +119,4 @@ export async function getOrCreateConfig(): Promise<ConfigDocument> {
   }
 
   return config;
-}
-
-export function interpolateSuccessMessage(
-  template: string,
-  teamName: string,
-): string {
-  return template.replaceAll("{teamName}", teamName);
 }
