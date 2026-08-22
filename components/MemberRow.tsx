@@ -123,7 +123,7 @@ export function MemberRow({
             </Label>
             <Input
               id={`members.${index}.registrationId`}
-              placeholder="GF202346252"
+              placeholder="GF202346252 or PGD12345678"
               maxLength={11}
               autoCapitalize="characters"
               spellCheck={false}

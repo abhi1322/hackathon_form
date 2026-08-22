@@ -34,8 +34,9 @@ export function createMemberSchema(allowedEmailDomain: string) {
       .trim()
       .min(1, "Registration ID is required")
       .transform((val) => val.replace(/\s+/g, "").toUpperCase())
-      .refine((val) => /^[A-Z]{2}[0-9]{9}$/.test(val), {
-        message: "Use format GF202346252 (2 letters + 9 digits)",
+      .refine((val) => /^([A-Z]{2}[0-9]{9}|[A-Z]{3}[0-9]{8})$/.test(val), {
+        message:
+          "Use format GF202346252 or PGD12345678 (2–3 letters + digits, 11 characters)",
       }),
     phone: z
       .string()
