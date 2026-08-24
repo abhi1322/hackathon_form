@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { requireAdminApiAuth } from "@/lib/admin-api-auth";
 import { connectDB } from "@/lib/db";
@@ -10,6 +9,7 @@ import {
 import { getOrCreateConfig } from "@/lib/models/Config";
 import { Participant } from "@/lib/models/Participant";
 import { Team } from "@/lib/models/Team";
+import { runWithOptionalTransaction } from "@/lib/mongo-transaction";
 import { createRegistrationSchema } from "@/lib/schemas/registration";
 
 interface RouteContext {
@@ -61,7 +61,6 @@ export async function PATCH(request: Request, context: RouteContext) {
   let validatedPayload:
     | import("@/lib/schemas/registration").RegistrationInput
     | null = null;
-  const session = await mongoose.startSession();
 
   try {
     payload = await request.json();
@@ -95,8 +94,8 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     validatedPayload = parsed.data;
 
-    await session.withTransaction(async () => {
-      await replaceTeamMembers(id, parsed.data, session);
+    await runWithOptionalTransaction(async (session) => {
+      await replaceTeamMembers(id, parsed.data, { session });
     });
 
     return NextResponse.json({
@@ -106,7 +105,16 @@ export async function PATCH(request: Request, context: RouteContext) {
   } catch (error) {
     if (validatedPayload) {
       const message = await mapDuplicateError(error, validatedPayload);
-      return NextResponse.json({ error: message }, { status: 409 });
+      const isDuplicate =
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        (error as { code?: number }).code === 11000;
+
+      return NextResponse.json(
+        { error: message },
+        { status: isDuplicate ? 409 : 500 },
+      );
     }
 
     console.error("PATCH /api/admin/teams/[id] failed:", error);
@@ -114,16 +122,12 @@ export async function PATCH(request: Request, context: RouteContext) {
       { error: "Failed to update team" },
       { status: 500 },
     );
-  } finally {
-    await session.endSession();
   }
 }
 
 export async function DELETE(_request: Request, context: RouteContext) {
   const unauthorized = await requireAdminApiAuth();
   if (unauthorized) return unauthorized;
-
-  const session = await mongoose.startSession();
 
   try {
     await connectDB();
@@ -134,8 +138,8 @@ export async function DELETE(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
-    await session.withTransaction(async () => {
-      await deleteTeamWithMembers(id, session);
+    await runWithOptionalTransaction(async (session) => {
+      await deleteTeamWithMembers(id, { session });
     });
 
     return NextResponse.json({ message: "Team deleted successfully" });
@@ -145,7 +149,5 @@ export async function DELETE(_request: Request, context: RouteContext) {
       { error: "Failed to delete team" },
       { status: 500 },
     );
-  } finally {
-    await session.endSession();
   }
 }

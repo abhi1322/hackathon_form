@@ -101,9 +101,13 @@ export async function mapDuplicateError(
   return "Registration failed due to a duplicate entry.";
 }
 
+type WriteOptions = {
+  session?: mongoose.ClientSession;
+};
+
 export async function createTeamWithMembers(
   payload: RegistrationInput,
-  session: mongoose.ClientSession,
+  options: WriteOptions = {},
 ) {
   const femaleCount = payload.members.filter(
     (member) => member.gender === "Female",
@@ -119,7 +123,7 @@ export async function createTeamWithMembers(
         problemStatement: payload.problemStatement.trim(),
       },
     ],
-    { session },
+    options.session ? { session: options.session } : undefined,
   );
 
   const participants = payload.members.map((member) => ({
@@ -131,7 +135,10 @@ export async function createTeamWithMembers(
     teamId: team._id,
   }));
 
-  await Participant.insertMany(participants, { session });
+  await Participant.insertMany(
+    participants,
+    options.session ? { session: options.session } : undefined,
+  );
 
   return team;
 }
@@ -139,13 +146,14 @@ export async function createTeamWithMembers(
 export async function replaceTeamMembers(
   teamId: string,
   payload: RegistrationInput,
-  session: mongoose.ClientSession,
+  options: WriteOptions = {},
 ) {
   const femaleCount = payload.members.filter(
     (member) => member.gender === "Female",
   ).length;
+  const sessionOption = options.session ? { session: options.session } : {};
 
-  await Participant.deleteMany({ teamId }, { session });
+  await Participant.deleteMany({ teamId }, sessionOption);
 
   const participants = payload.members.map((member) => ({
     name: member.name.trim(),
@@ -156,7 +164,10 @@ export async function replaceTeamMembers(
     teamId,
   }));
 
-  await Participant.insertMany(participants, { session });
+  await Participant.insertMany(
+    participants,
+    options.session ? { session: options.session } : undefined,
+  );
 
   await Team.findByIdAndUpdate(
     teamId,
@@ -167,14 +178,15 @@ export async function replaceTeamMembers(
       femaleCount,
       problemStatement: payload.problemStatement.trim(),
     },
-    { session },
+    sessionOption,
   );
 }
 
 export async function deleteTeamWithMembers(
   teamId: string,
-  session: mongoose.ClientSession,
+  options: WriteOptions = {},
 ) {
-  await Participant.deleteMany({ teamId }, { session });
-  await Team.findByIdAndDelete(teamId, { session });
+  const sessionOption = options.session ? { session: options.session } : {};
+  await Participant.deleteMany({ teamId }, sessionOption);
+  await Team.findByIdAndDelete(teamId, sessionOption);
 }

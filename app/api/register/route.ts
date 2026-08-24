@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import {
@@ -6,6 +5,8 @@ import {
   mapDuplicateError,
 } from "@/lib/duplicate-error";
 import { getOrCreateConfig } from "@/lib/models/Config";
+import { runWithOptionalTransaction } from "@/lib/mongo-transaction";
+import { normalizeProblemStatements } from "@/lib/problem-statements";
 import { createRegistrationSchema } from "@/lib/schemas/registration";
 
 export async function POST(request: Request) {
@@ -19,8 +20,6 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
-
-  const session = await mongoose.startSession();
 
   try {
     await connectDB();
@@ -38,7 +37,9 @@ export async function POST(request: Request) {
       maxTeamSize: config.maxTeamSize,
       minFemaleMembers: config.minFemaleMembers,
       allowedEmailDomain: config.allowedEmailDomain,
-      problemStatements: config.problemStatements ?? [],
+      problemStatements: normalizeProblemStatements(
+        config.problemStatements ?? [],
+      ),
     });
 
     const parsed = schema.safeParse(payload);
@@ -56,8 +57,8 @@ export async function POST(request: Request) {
     validatedPayload = parsed.data;
     let createdTeamId: string | null = null;
 
-    await session.withTransaction(async () => {
-      const team = await createTeamWithMembers(parsed.data, session);
+    await runWithOptionalTransaction(async (session) => {
+      const team = await createTeamWithMembers(parsed.data, { session });
       createdTeamId = team._id.toString();
     });
 
@@ -72,15 +73,23 @@ export async function POST(request: Request) {
   } catch (error) {
     if (validatedPayload) {
       const message = await mapDuplicateError(error, validatedPayload);
-      return NextResponse.json({ error: message }, { status: 409 });
+      const isDuplicate =
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        (error as { code?: number }).code === 11000;
+
+      return NextResponse.json(
+        { error: message },
+        { status: isDuplicate ? 409 : 500 },
+      );
     }
 
     console.error("POST /api/register failed:", error);
-    return NextResponse.json(
-      { error: "Registration failed. Please try again." },
-      { status: 500 },
-    );
-  } finally {
-    await session.endSession();
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Registration failed. Please try again.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

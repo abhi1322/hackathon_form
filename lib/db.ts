@@ -5,6 +5,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
+  indexesSynced: boolean;
 }
 
 declare global {
@@ -14,10 +15,13 @@ declare global {
 const cached: MongooseCache = global.mongooseCache ?? {
   conn: null,
   promise: null,
+  indexesSynced: false,
 };
 
 if (!global.mongooseCache) {
   global.mongooseCache = cached;
+} else if (global.mongooseCache.indexesSynced === undefined) {
+  global.mongooseCache.indexesSynced = false;
 }
 
 function getConnectionErrorMessage(error: unknown): string {
@@ -77,7 +81,14 @@ export async function connectDB(): Promise<typeof mongoose> {
     import("@/lib/models/Participant"),
   ]);
 
-  await mongoose.connection.syncIndexes();
+  if (!cached.indexesSynced) {
+    try {
+      await mongoose.connection.syncIndexes();
+      cached.indexesSynced = true;
+    } catch (error) {
+      console.error("MongoDB index sync skipped:", error);
+    }
+  }
 
   return cached.conn;
 }

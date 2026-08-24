@@ -182,10 +182,21 @@ export function RegistrationForm() {
         body: JSON.stringify(values),
       });
 
-      const data = await response.json();
+      const rawBody = await response.text();
+      let data: { error?: string; teamName?: string } = {};
+      if (rawBody) {
+        try {
+          data = JSON.parse(rawBody) as { error?: string; teamName?: string };
+        } catch {
+          data = {};
+        }
+      }
 
       if (!response.ok) {
-        setSubmitError(data.error ?? "Registration failed.");
+        setSubmitError(
+          data.error ??
+            `Registration failed (${response.status}). Please try again.`,
+        );
         return;
       }
 
