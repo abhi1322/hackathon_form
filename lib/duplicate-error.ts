@@ -123,7 +123,7 @@ export async function createTeamWithMembers(
         problemStatement: payload.problemStatement.trim(),
       },
     ],
-    options.session ? { session: options.session } : undefined,
+    options.session ? { session: options.session } : {},
   );
 
   const participants = payload.members.map((member) => ({
@@ -137,7 +137,7 @@ export async function createTeamWithMembers(
 
   await Participant.insertMany(
     participants,
-    options.session ? { session: options.session } : undefined,
+    options.session ? { session: options.session } : {},
   );
 
   return team;
@@ -166,7 +166,7 @@ export async function replaceTeamMembers(
 
   await Participant.insertMany(
     participants,
-    options.session ? { session: options.session } : undefined,
+    options.session ? { session: options.session } : {},
   );
 
   await Team.findByIdAndUpdate(
