@@ -123,8 +123,8 @@ export function MemberRow({
             </Label>
             <Input
               id={`members.${index}.registrationId`}
-              placeholder="GF202346252 or PGD12345678"
-              maxLength={11}
+              placeholder="GF202346252 or PGD202344271"
+              maxLength={12}
               autoCapitalize="characters"
               spellCheck={false}
               className="uppercase tracking-wide"
@@ -136,7 +136,7 @@ export function MemberRow({
                   const cleaned = input.value
                     .replace(/\s+/g, "")
                     .toUpperCase()
-                    .slice(0, 11);
+                    .slice(0, 12);
                   if (input.value !== cleaned) {
                     input.value = cleaned;
                   }

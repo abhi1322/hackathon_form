@@ -60,10 +60,10 @@ export function createMemberSchema(allowedEmailDomain: string) {
       .transform((val) => val.replace(/\s+/g, "").toUpperCase())
       .refine(
         (val) =>
-          /^[A-Z]{2}[0-9]{9}$/.test(val) || /^PGD[0-9]{8}$/.test(val),
+          /^[A-Z]{2}[0-9]{9}$/.test(val) || /^PGD[0-9]{9}$/.test(val),
         {
           message:
-            "Use GF202346252 (2 letters + 9 digits) or PGD12345678 (PGD + 8 digits)",
+            "Use GF202346252 (2 letters + 9 digits) or PGD202344271 (PGD + 9 digits)",
         },
       ),
     phone: z

@@ -91,10 +91,41 @@ export function AdminDashboard() {
     router.refresh();
   }
 
-  function handleDownloadStart() {
+  async function handleDownloadStart() {
     setExporting(true);
-    window.location.href = "/api/admin/teams/export";
-    window.setTimeout(() => setExporting(false), 2000);
+    try {
+      const response = await fetch("/api/admin/teams/export");
+      if (!response.ok) {
+        const text = await response.text();
+        let message = "Failed to download export.";
+        try {
+          const json = JSON.parse(text);
+          if (json.error) message = json.error;
+        } catch {}
+        alert(message);
+        return;
+      }
+
+      const blob = await response.blob();
+      const disposition = response.headers.get("Content-Disposition");
+      const match = disposition?.match(/filename="?([^"]+)"?/);
+      const filename =
+        match?.[1] ??
+        `hackathon-teams-${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Failed to download export. Please try again.");
+    } finally {
+      setExporting(false);
+    }
   }
 
   return (
