@@ -21,13 +21,20 @@ function StatusItem({
   label: string;
 }) {
   return (
-    <li className="flex items-center gap-2 text-sm">
+    <li className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm min-w-0">
       {ok ? (
         <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
       ) : (
-        <Circle className="h-4 w-4 shrink-0 text-text-muted" />
+        <Circle className="h-4 w-4 shrink-0 text-text-muted/70" />
       )}
-      <span className={cn(ok ? "text-text" : "text-text-muted")}>{label}</span>
+      <span
+        className={cn(
+          "truncate transition-colors",
+          ok ? "font-medium text-text" : "text-text-muted",
+        )}
+      >
+        {label}
+      </span>
     </li>
   );
 }
@@ -46,8 +53,8 @@ export function ConstraintBar({
   const femaleCountOk = femaleCount >= minFemaleMembers;
 
   return (
-    <div className="sticky bottom-4 z-10 rounded-full border border-border bg-surface/95 backdrop-blur-sm px-5 py-4 shadow-[var(--shadow-soft)]">
-      <ul className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2">
+    <div className="sticky bottom-4 z-10 rounded-2xl sm:rounded-full border border-border/80 bg-surface/95 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-3.5 shadow-md shadow-black/5">
+      <ul className="grid grid-cols-2 gap-x-3 gap-y-2 sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6 sm:gap-y-2">
         <StatusItem
           ok={memberCountOk}
           label={`Members ${memberCount}/${minTeamSize}–${maxTeamSize}`}
