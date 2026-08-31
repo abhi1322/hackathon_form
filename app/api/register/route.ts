@@ -4,7 +4,7 @@ import {
   createTeamWithMembers,
   mapDuplicateError,
 } from "@/lib/duplicate-error";
-import { getOrCreateConfig } from "@/lib/models/Config";
+import { getOrCreateConfig, resolveAllowedEmailDomains } from "@/lib/models/Config";
 import { runWithOptionalTransaction } from "@/lib/mongo-transaction";
 import { normalizeProblemStatements } from "@/lib/problem-statements";
 import { createRegistrationSchema } from "@/lib/schemas/registration";
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       minTeamSize: config.minTeamSize,
       maxTeamSize: config.maxTeamSize,
       minFemaleMembers: config.minFemaleMembers,
-      allowedEmailDomain: config.allowedEmailDomain,
+      allowedEmailDomains: resolveAllowedEmailDomains(config),
       problemStatements: normalizeProblemStatements(
         config.problemStatements ?? [],
       ),

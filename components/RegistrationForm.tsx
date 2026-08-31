@@ -17,6 +17,7 @@ import {
   Button,
   Card,
   FieldError,
+  FieldHint,
   Input,
   Label,
 } from "@/components/ui/form";
@@ -268,9 +269,11 @@ export function RegistrationForm() {
       <form onSubmit={onSubmit} className="space-y-8 pb-28">
         <Card>
           <Label htmlFor="teamName">Team Name</Label>
+          <FieldHint>Unique name, 2–80 characters.</FieldHint>
           <Input
             id="teamName"
             placeholder="Enter a unique team name"
+            className="mt-2"
             {...register("teamName")}
           />
           <FieldError message={errors.teamName?.message} />
@@ -278,8 +281,9 @@ export function RegistrationForm() {
 
         <Card>
           <Label htmlFor="problemStatement">Problem Statement</Label>
+          <FieldHint>Pick one problem. Search by title or PS number.</FieldHint>
           {problemStatementsConfigured ? (
-            <>
+            <div className="mt-2">
               <Controller
                 name="problemStatement"
                 control={control}
@@ -294,7 +298,7 @@ export function RegistrationForm() {
                 )}
               />
               <FieldError message={errors.problemStatement?.message} />
-            </>
+            </div>
           ) : (
             <p className="text-sm text-text-muted">
               Problem statements not configured yet.

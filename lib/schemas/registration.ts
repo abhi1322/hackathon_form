@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { buildEmailDomainRegex } from "@/lib/normalize";
+import {
+  buildEmailDomainsRegex,
+  formatAllowedEmailDomains,
+} from "@/lib/normalize";
 import {
   isValidProblemStatement,
   normalizeProblemStatements,
@@ -12,7 +15,7 @@ export type RegistrationConfig = {
   minTeamSize: number;
   maxTeamSize: number;
   minFemaleMembers: number;
-  allowedEmailDomain: string;
+  allowedEmailDomains: string[];
   problemStatements: ProblemStatement[];
 };
 
@@ -40,8 +43,9 @@ export const problemStatementSchema = z
     }
   });
 
-export function createMemberSchema(allowedEmailDomain: string) {
-  const domainRegex = buildEmailDomainRegex(allowedEmailDomain);
+export function createMemberSchema(allowedEmailDomains: string[]) {
+  const domainRegex = buildEmailDomainsRegex(allowedEmailDomains);
+  const domainMessage = `Email must use ${formatAllowedEmailDomains(allowedEmailDomains)}`;
 
   return z.object({
     name: z.string().trim().min(2, "Full name is required"),
@@ -51,7 +55,7 @@ export function createMemberSchema(allowedEmailDomain: string) {
       .email("Enter a valid email address")
       .regex(
         domainRegex,
-        `Email must use @${allowedEmailDomain}`,
+        domainMessage,
       ),
     registrationId: z
       .string()
@@ -60,10 +64,12 @@ export function createMemberSchema(allowedEmailDomain: string) {
       .transform((val) => val.replace(/\s+/g, "").toUpperCase())
       .refine(
         (val) =>
-          /^[A-Z]{2}[0-9]{9}$/.test(val) || /^PGD[0-9]{9}$/.test(val),
+          /^[A-Z]{2}[0-9]{9}$/.test(val) ||
+          /^PGD[0-9]{9}$/.test(val) ||
+          /^INGF[0-9]{9}$/.test(val),
         {
           message:
-            "Use GF202346252 (2 letters + 9 digits) or PGD202344271 (PGD + 9 digits)",
+            "Use GF202346252 (2 letters + 9 digits), PGD202344271 (PGD + 9 digits), or INGF202346252 (INGF + 9 digits)",
         },
       ),
     phone: z
@@ -79,7 +85,7 @@ export function createRegistrationSchema(
   config: RegistrationConfig,
   options: RegistrationSchemaOptions = {},
 ) {
-  const memberSchema = createMemberSchema(config.allowedEmailDomain);
+  const memberSchema = createMemberSchema(config.allowedEmailDomains);
   const problemStatements = normalizeProblemStatements(config.problemStatements);
 
   return z
@@ -201,7 +207,7 @@ export const adminConfigUpdateSchema = z
     minTeamSize: z.number().int().min(1).optional(),
     maxTeamSize: z.number().int().min(1).optional(),
     minFemaleMembers: z.number().int().min(0).optional(),
-    allowedEmailDomain: z.string().trim().min(3).optional(),
+    allowedEmailDomains: z.array(z.string().trim().min(3)).min(1).optional(),
     registrationOpen: z.boolean().optional(),
     formEyebrow: z.string().trim().min(1).max(120).optional(),
     formTitle: z.string().trim().min(1).max(120).optional(),

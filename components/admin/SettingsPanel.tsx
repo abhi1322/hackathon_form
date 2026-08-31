@@ -227,7 +227,7 @@ export function SettingsPanel({
       minTeamSize: config.minTeamSize,
       maxTeamSize: config.maxTeamSize,
       minFemaleMembers: config.minFemaleMembers,
-      allowedEmailDomain: config.allowedEmailDomain,
+      allowedEmailDomains: config.allowedEmailDomains,
       registrationOpen: config.registrationOpen,
     });
   }
@@ -434,16 +434,24 @@ export function SettingsPanel({
           </div>
 
           <div>
-            <Label htmlFor="allowedEmailDomain">Allowed Email Domain</Label>
+            <Label htmlFor="allowedEmailDomains">Allowed Email Domains</Label>
             <Input
-              id="allowedEmailDomain"
-              value={config.allowedEmailDomain}
+              id="allowedEmailDomains"
+              value={config.allowedEmailDomains.join(", ")}
               onChange={(event) =>
                 setConfig({
                   ...config,
-                  allowedEmailDomain: event.target.value,
+                  allowedEmailDomains: [
+                    ...new Set(
+                      event.target.value
+                        .split(",")
+                        .map((domain) => domain.trim())
+                        .filter(Boolean),
+                    ),
+                  ],
                 })
               }
+              placeholder="shoolini.edu.in, gmail.com"
             />
           </div>
 

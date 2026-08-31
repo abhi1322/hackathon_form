@@ -13,11 +13,16 @@ export const DEFAULT_FORM_COPY = {
   submitButtonText: "Submit Registration",
 } as const;
 
+export const DEFAULT_ALLOWED_EMAIL_DOMAINS = [
+  "shoolini.edu.in",
+  "gmail.com",
+] as const;
+
 export type PublicConfig = {
   minTeamSize: number;
   maxTeamSize: number;
   minFemaleMembers: number;
-  allowedEmailDomain: string;
+  allowedEmailDomains: string[];
   registrationOpen: boolean;
   formEyebrow: string;
   formTitle: string;

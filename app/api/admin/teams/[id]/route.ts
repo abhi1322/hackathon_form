@@ -6,7 +6,7 @@ import {
   mapDuplicateError,
   replaceTeamMembers,
 } from "@/lib/duplicate-error";
-import { getOrCreateConfig } from "@/lib/models/Config";
+import { getOrCreateConfig, resolveAllowedEmailDomains } from "@/lib/models/Config";
 import { Participant } from "@/lib/models/Participant";
 import { Team } from "@/lib/models/Team";
 import { runWithOptionalTransaction } from "@/lib/mongo-transaction";
@@ -78,7 +78,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         minTeamSize: config.minTeamSize,
         maxTeamSize: config.maxTeamSize,
         minFemaleMembers: config.minFemaleMembers,
-        allowedEmailDomain: config.allowedEmailDomain,
+        allowedEmailDomains: resolveAllowedEmailDomains(config),
         problemStatements: config.problemStatements ?? [],
       },
       { legacyProblemStatement: existingTeam.problemStatement ?? "" },

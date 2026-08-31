@@ -122,3 +122,17 @@ export function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return <p className="mt-1.5 text-xs text-error">{message}</p>;
 }
+
+export function FieldHint({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <p className={cn("mt-1.5 text-xs leading-relaxed text-text-muted", className)}>
+      {children}
+    </p>
+  );
+}

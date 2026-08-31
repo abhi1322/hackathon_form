@@ -71,7 +71,7 @@ function applyConfigUpdates(
     "minTeamSize",
     "maxTeamSize",
     "minFemaleMembers",
-    "allowedEmailDomain",
+    "allowedEmailDomains",
     "registrationOpen",
     "formEyebrow",
     "formTitle",
@@ -86,6 +86,13 @@ function applyConfigUpdates(
   for (const field of fields) {
     if (updates[field] !== undefined) {
       config.set(field, updates[field]);
+    }
+  }
+
+  if (updates.allowedEmailDomains !== undefined) {
+    const primaryDomain = updates.allowedEmailDomains[0];
+    if (primaryDomain) {
+      config.set("allowedEmailDomain", primaryDomain);
     }
   }
 

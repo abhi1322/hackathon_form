@@ -5,6 +5,7 @@ import {
 } from "@/lib/problem-statements";
 import {
   DEFAULT_FORM_COPY,
+  DEFAULT_ALLOWED_EMAIL_DOMAINS,
   type PublicConfig,
 } from "@/lib/public-config";
 
@@ -21,6 +22,11 @@ const configSchema = new Schema(
       required: true,
       default: "shoolini.edu.in",
       trim: true,
+    },
+    allowedEmailDomains: {
+      type: [String],
+      required: true,
+      default: [...DEFAULT_ALLOWED_EMAIL_DOMAINS],
     },
     registrationOpen: { type: Boolean, required: true, default: true },
     formEyebrow: {
@@ -90,12 +96,22 @@ export const Config: Model<ConfigDocument> =
   mongoose.models.Config ??
   mongoose.model<ConfigDocument>("Config", configSchema);
 
+export function resolveAllowedEmailDomains(config: IConfig): string[] {
+  const existing = config.allowedEmailDomains;
+  if (Array.isArray(existing) && existing.length > 0) {
+    return [...new Set(existing.map((domain) => domain.trim()).filter(Boolean))];
+  }
+
+  const legacy = config.allowedEmailDomain?.trim() || DEFAULT_ALLOWED_EMAIL_DOMAINS[0];
+  return [...new Set([legacy, ...DEFAULT_ALLOWED_EMAIL_DOMAINS])];
+}
+
 export function toPublicConfig(config: IConfig): PublicConfig {
   return {
     minTeamSize: config.minTeamSize,
     maxTeamSize: config.maxTeamSize,
     minFemaleMembers: config.minFemaleMembers,
-    allowedEmailDomain: config.allowedEmailDomain,
+    allowedEmailDomains: resolveAllowedEmailDomains(config),
     registrationOpen: config.registrationOpen,
     formEyebrow: config.formEyebrow ?? DEFAULT_FORM_COPY.formEyebrow,
     formTitle: config.formTitle ?? DEFAULT_FORM_COPY.formTitle,
@@ -140,6 +156,24 @@ export async function getOrCreateConfig(): Promise<ConfigDocument> {
       config.markModified("problemStatements");
       changed = true;
     }
+  }
+
+  const allowedEmailDomains = resolveAllowedEmailDomains(config);
+  const currentDomains = config.get("allowedEmailDomains");
+  if (
+    !Array.isArray(currentDomains) ||
+    currentDomains.length === 0 ||
+    JSON.stringify(currentDomains) !== JSON.stringify(allowedEmailDomains)
+  ) {
+    config.set("allowedEmailDomains", allowedEmailDomains);
+    config.markModified("allowedEmailDomains");
+    changed = true;
+  }
+
+  const primaryDomain = allowedEmailDomains[0] ?? DEFAULT_ALLOWED_EMAIL_DOMAINS[0];
+  if (config.allowedEmailDomain !== primaryDomain) {
+    config.set("allowedEmailDomain", primaryDomain);
+    changed = true;
   }
 
   if (changed) {
