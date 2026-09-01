@@ -97,13 +97,19 @@ export const Config: Model<ConfigDocument> =
   mongoose.model<ConfigDocument>("Config", configSchema);
 
 export function resolveAllowedEmailDomains(config: IConfig): string[] {
-  const existing = config.allowedEmailDomains;
-  if (Array.isArray(existing) && existing.length > 0) {
-    return [...new Set(existing.map((domain) => domain.trim()).filter(Boolean))];
-  }
+  const existing = Array.isArray(config.allowedEmailDomains)
+    ? config.allowedEmailDomains.map((domain) => domain.trim()).filter(Boolean)
+    : [];
 
-  const legacy = config.allowedEmailDomain?.trim() || DEFAULT_ALLOWED_EMAIL_DOMAINS[0];
-  return [...new Set([legacy, ...DEFAULT_ALLOWED_EMAIL_DOMAINS])];
+  const legacy = config.allowedEmailDomain?.trim();
+  const base =
+    existing.length > 0
+      ? existing
+      : legacy
+        ? [legacy]
+        : [...DEFAULT_ALLOWED_EMAIL_DOMAINS];
+
+  return [...new Set([...base, ...DEFAULT_ALLOWED_EMAIL_DOMAINS])];
 }
 
 export function toPublicConfig(config: IConfig): PublicConfig {

@@ -15,6 +15,7 @@ export const DEFAULT_FORM_COPY = {
 
 export const DEFAULT_ALLOWED_EMAIL_DOMAINS = [
   "shoolini.edu.in",
+  "shooliniuniversity.com",
   "gmail.com",
 ] as const;
 

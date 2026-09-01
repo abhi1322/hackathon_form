@@ -451,7 +451,7 @@ export function SettingsPanel({
                   ],
                 })
               }
-              placeholder="shoolini.edu.in, gmail.com"
+              placeholder="shoolini.edu.in, shooliniuniversity.com, gmail.com"
             />
           </div>
 
