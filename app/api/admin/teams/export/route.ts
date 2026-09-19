@@ -18,6 +18,7 @@ export async function GET() {
       "Student Name": row.studentName,
       Email: row.email,
       "Phone Number": row.phone,
+      "Selection Status": row.selectionStatus,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetRows);
@@ -27,6 +28,7 @@ export async function GET() {
       { wch: 28 },
       { wch: 32 },
       { wch: 16 },
+      { wch: 18 },
     ];
 
     const workbook = XLSX.utils.book_new();

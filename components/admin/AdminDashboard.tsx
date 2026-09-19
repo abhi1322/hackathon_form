@@ -8,22 +8,13 @@ import {
   AdminTabs,
   type AdminTab,
 } from "@/components/admin/AdminTabs";
+import { ProblemStatementStatsTable } from "@/components/admin/ProblemStatementStatsTable";
 import { SettingsPanel } from "@/components/admin/SettingsPanel";
-import { StatsCards } from "@/components/admin/StatsCards";
+import { StatsCards, type StatsData } from "@/components/admin/StatsCards";
 import { TeamsTable } from "@/components/admin/TeamsTable";
 import { Button } from "@/components/ui/form";
 import type { PublicConfig } from "@/lib/public-config";
 import type { TeamRecord } from "@/components/admin/EditTeamModal";
-
-interface StatsData {
-  totalTeams: number;
-  totalParticipants: number;
-  femaleParticipants: number;
-  femaleParticipationPercent: number;
-  teamsMeetingQuota: number;
-  teamsNotMeetingQuota: number;
-  minFemaleMembers: number;
-}
 
 function parseTab(value: string | null): AdminTab {
   if (value === "teams" || value === "settings" || value === "overview") {
@@ -154,9 +145,16 @@ export function AdminDashboard() {
         {activeTab === "overview" && (
           <AdminTabPanel
             title="Overview"
-            description="Key registration metrics and quota audit summary."
+            description="Key registration metrics, problem statement breakdown, and female quota audit."
           >
             <StatsCards stats={stats} />
+            {stats && (
+              <ProblemStatementStatsTable
+                stats={stats.problemStatementStats ?? []}
+                totalTeams={stats.totalTeams}
+                onRefresh={() => loadDashboard(searchQuery)}
+              />
+            )}
             {stats && (
               <p className="mt-5 text-sm text-text-muted">
                 {stats.totalTeams} team{stats.totalTeams === 1 ? "" : "s"}{" "}

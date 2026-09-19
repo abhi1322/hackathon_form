@@ -64,6 +64,7 @@ export async function GET(request: Request) {
       memberCount: team.memberCount,
       femaleCount: team.femaleCount,
       problemStatement: team.problemStatement ?? "",
+      selected: Boolean(team.selected),
       createdAt: team.createdAt,
       members: (participantsByTeam.get(team._id.toString()) ?? []).map(
         (participant) => ({

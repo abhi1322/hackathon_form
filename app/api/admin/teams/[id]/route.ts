@@ -37,6 +37,7 @@ export async function GET(_request: Request, context: RouteContext) {
       memberCount: team.memberCount,
       femaleCount: team.femaleCount,
       problemStatement: team.problemStatement ?? "",
+      selected: Boolean(team.selected),
       createdAt: team.createdAt,
       members: members.map((member) => ({
         id: member._id.toString(),
@@ -72,6 +73,21 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
+    if (
+      typeof payload === "object" &&
+      payload !== null &&
+      "selected" in payload &&
+      typeof (payload as { selected?: unknown }).selected === "boolean" &&
+      !("members" in payload)
+    ) {
+      existingTeam.selected = (payload as { selected: boolean }).selected;
+      await existingTeam.save();
+      return NextResponse.json({
+        message: "Team status updated successfully",
+        selected: existingTeam.selected,
+      });
+    }
+
     const config = await getOrCreateConfig();
     const schema = createRegistrationSchema(
       {
@@ -97,6 +113,17 @@ export async function PATCH(request: Request, context: RouteContext) {
     await runWithOptionalTransaction(async (session) => {
       await replaceTeamMembers(id, parsed.data, { session });
     });
+
+    if (
+      typeof payload === "object" &&
+      payload !== null &&
+      "selected" in payload &&
+      typeof (payload as { selected?: unknown }).selected === "boolean"
+    ) {
+      await Team.findByIdAndUpdate(id, {
+        selected: (payload as { selected: boolean }).selected,
+      });
+    }
 
     return NextResponse.json({
       message: "Team updated successfully",

@@ -7,6 +7,7 @@ export interface ExportTeamRow {
   studentName: string;
   email: string;
   phone: string;
+  selectionStatus: string;
 }
 
 export async function getAllTeamsForExport(): Promise<ExportTeamRow[]> {
@@ -44,6 +45,7 @@ export async function getAllTeamsForExport(): Promise<ExportTeamRow[]> {
         studentName: member.name,
         email: member.email,
         phone: member.phone,
+        selectionStatus: team.selected ? "Selected" : "Not Selected",
       });
     }
   }

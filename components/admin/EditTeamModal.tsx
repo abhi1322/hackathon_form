@@ -31,6 +31,7 @@ export interface TeamRecord {
   memberCount: number;
   femaleCount: number;
   problemStatement: string;
+  selected?: boolean;
   createdAt: string;
   members: Array<{
     id: string;
@@ -57,6 +58,7 @@ export function EditTeamModal({
 }: EditTeamModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [isSelected, setIsSelected] = useState<boolean>(Boolean(team.selected));
 
   const schema = useMemo(
     () =>
@@ -132,7 +134,7 @@ export function EditTeamModal({
       const response = await fetch(`/api/admin/teams/${team.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, selected: isSelected }),
       });
 
       const data = await response.json();
@@ -201,6 +203,23 @@ export function EditTeamModal({
                 Problem statements not configured yet.
               </p>
             )}
+          </div>
+
+          <div className="rounded-[var(--radius-md)] border border-border bg-bg/50 p-3">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={(e) => setIsSelected(e.target.checked)}
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
+              />
+              <div>
+                <p className="text-sm font-medium text-text">Mark as Selected Team</p>
+                <p className="text-xs text-text-muted">
+                  Check this if the team is selected / shortlisted for the next round
+                </p>
+              </div>
+            </label>
           </div>
 
           <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
